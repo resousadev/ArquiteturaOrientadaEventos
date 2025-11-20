@@ -48,6 +48,9 @@ bin/
 *.ipr
 out/
 !**/src/main/**/out/
+
+### Environment Variables ###
+.env
 !**/src/test/**/out/
 
 ### NetBeans ###
