@@ -50,9 +50,9 @@ src/main/resources/
 - **User**: resousadev@gmail.com
 
 ## Package Naming Convention
-⚠️ **Important**: The original package name `ms-checkout` (with hyphen) is invalid in Java. The project uses `ms_checkout` (with underscore) instead. When creating new classes, always use the underscore convention:
+⚠️ **Important**: The package name uses `mscheckout` (no separators) since hyphens are not allowed in Java package names. When creating new classes, always use:
 ```java
-package io.resousadev.linuxtips.ms_checkout;
+package io.resousadev.linuxtips.mscheckout;
 ```
 
 ## Current Architecture
