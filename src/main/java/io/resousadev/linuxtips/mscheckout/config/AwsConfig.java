@@ -5,7 +5,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import lombok.extern.slf4j.Slf4j;
-import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.eventbridge.EventBridgeClient;
 
@@ -15,24 +16,27 @@ public class AwsConfig {
     
     @Value("${aws.region}")
     private String awsRegion;
+    
+    @Value("${aws.accessKeyId}")
+    private String accessKeyId;
+    
+    @Value("${aws.secretAccessKey}")
+    private String secretAccessKey;
 
     @Bean
     public EventBridgeClient eventBridgeClient() {
         log.info("Configurando EventBridgeClient");
         log.info("Região AWS: {}", awsRegion);
+        log.info("Access Key ID: {}...", accessKeyId.substring(0, 4));
         
-        try {
-            var credentialsProvider = DefaultCredentialsProvider.builder().build();
-            var credentials = credentialsProvider.resolveCredentials();
-            log.info("Credenciais carregadas - Access Key ID: {}...", 
-                credentials.accessKeyId().substring(0, 4));
-        } catch (Exception e) {
-            log.error("Erro ao carregar credenciais AWS", e);
-        }
+        AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(
+            accessKeyId,
+            secretAccessKey
+        );
         
         return EventBridgeClient.builder()
             .region(Region.of(awsRegion))
-            .credentialsProvider(DefaultCredentialsProvider.builder().build())
+            .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
             .build();
     }
 }
