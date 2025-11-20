@@ -32,9 +32,17 @@ public class EventBridgeProducer {
             .eventBusName("status-pedido-bus")
             .build();
 
-        eventBridgeClient().putEvents(r -> {
-            log.info("Evento {} enviado com sucesso!", r);
-            r.entries(eventRequest);
-        });
+        var response = eventBridgeClient().putEvents(r -> r.entries(eventRequest));
+        
+        if (response.failedEntryCount() > 0) {
+            log.error("Falha ao enviar evento! Status do pagamento: {} | Erro: {}", 
+                payment.status(), 
+                response.entries().get(0).errorMessage());
+        } else {
+            log.info("Evento enviado com sucesso! Status do pagamento: {} | EventId: {} | HTTP Status: {}", 
+                payment.status(),
+                response.entries().get(0).eventId(),
+                response.sdkHttpResponse().statusCode());
+        }
     }
 }
