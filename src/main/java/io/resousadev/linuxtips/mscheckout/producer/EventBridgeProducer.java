@@ -4,10 +4,7 @@ import org.springframework.stereotype.Component;
 
 import io.resousadev.linuxtips.mscheckout.model.Payment;
 import lombok.RequiredArgsConstructor;
-import io.resousadev.linuxtips.mscheckout.model.Payment;
 import lombok.extern.slf4j.Slf4j;
-import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.eventbridge.EventBridgeClient;
 import software.amazon.awssdk.services.eventbridge.model.PutEventsRequest;
 import software.amazon.awssdk.services.eventbridge.model.PutEventsRequestEntry;
