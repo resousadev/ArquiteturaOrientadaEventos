@@ -27,7 +27,7 @@ public class EventBridgeProducer {
         log.debug("Region: us-east-1");
 
         PutEventsRequestEntry eventRequest = PutEventsRequestEntry.builder()
-            .source("ms-checkout")
+            .source(payment.origem())
             .detailType(payment.status())
             .detail("{ \"valor\": \"" + payment.valor() + "\" }")
             .eventBusName("status-pedido-bus")
