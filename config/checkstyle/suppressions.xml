@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+        "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+        "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+
+<suppressions>
+    <!-- Suppress all checks in test files -->
+    <suppress checks=".*" files=".*[\\/]src[\\/]test[\\/].*"/>
+    
+    <!-- Suppress specific checks for generated files -->
+    <suppress checks=".*" files=".*[\\/]build[\\/]generated[\\/].*"/>
+    
+    <!-- Suppress line length for imports -->
+    <suppress checks="LineLength" files=".*\.java" lines="1-50"/>
+</suppressions>
