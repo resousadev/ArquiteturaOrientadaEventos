@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
  * - Limpa o MDC após processamento para evitar memory leaks
  * 
  * @author resousadev
- * @since 2025-11-20
+ * @since 0.0.1-SNAPSHOT
  */
 @Slf4j
 @Component
