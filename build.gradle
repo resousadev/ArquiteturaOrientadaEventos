@@ -24,6 +24,7 @@ dependencies {
 	implementation 'software.amazon.awssdk:eventbridge:2.38.5'
 	implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
 	compileOnly 'org.projectlombok:lombok'
   	annotationProcessor 'org.projectlombok:lombok'
@@ -44,7 +45,7 @@ configurations {
 
 checkstyle {
 	toolVersion = '10.12.5'
-	configFile = file('config/checkstyle/checkstyle.xml')
+	configFile = file("${projectDir}/config/checkstyle/checkstyle.xml")
 	ignoreFailures = false
 }
 
