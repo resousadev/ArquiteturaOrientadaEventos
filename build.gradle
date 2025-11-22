@@ -23,6 +23,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'software.amazon.awssdk:eventbridge:2.38.5'
 	implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	
 	// Logback with JSON structured logging support
 	implementation 'net.logstash.logback:logstash-logback-encoder:8.0'
@@ -46,7 +48,7 @@ configurations {
 
 checkstyle {
 	toolVersion = '10.12.5'
-	configFile = file('config/checkstyle/checkstyle.xml')
+	configFile = file("${projectDir}/config/checkstyle/checkstyle.xml")
 	ignoreFailures = false
 }
 
