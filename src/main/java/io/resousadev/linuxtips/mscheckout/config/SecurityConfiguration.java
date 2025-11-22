@@ -36,7 +36,7 @@ public class SecurityConfiguration {
                 .permitAll()
             )
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login").hasAnyRole("ADMIN", "USER")
+                .requestMatchers("/login").permitAll()
                 .requestMatchers("/v1/mscheckout/orders").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
