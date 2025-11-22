@@ -36,7 +36,8 @@ public class SecurityConfiguration {
                 .permitAll()
             )
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers("/login").hasAnyRole("ADMIN", "USER")
+                .requestMatchers("/v1/mscheckout/orders").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .build();
@@ -48,16 +49,16 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public UserDetailsService userDetailsService() {
+    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
         UserDetails admin = User.builder()
             .username("admin")
-            .password(passwordEncoder().encode("admin123"))
+            .password(passwordEncoder.encode("admin123"))
             .roles("ADMIN", "USER")
             .build();
 
         UserDetails user = User.builder()
             .username("user")
-            .password(passwordEncoder().encode("user123"))
+            .password(passwordEncoder.encode("user123"))
             .roles("USER")
             .build();
 
