@@ -20,7 +20,6 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-            .csrf(AbstractHttpConfigurer::disable)
             .formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
