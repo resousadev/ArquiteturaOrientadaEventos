@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: ms-checkout-test
+
+# Credenciais fake para testes (não serão usadas em ambiente de teste)
+# O EventBridgeClient será mockado, então essas credenciais nunca serão enviadas para AWS
+aws:
+  region: us-east-1
+  accessKeyId: AKIAIOSFODNN7EXAMPLE
+  secretAccessKey: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+
+server:
+  port: 0  # Porta aleatória para testes evitar conflito
+
+logging:
+  level:
+    io.resousadev.linuxtips.mscheckout: DEBUG
+
