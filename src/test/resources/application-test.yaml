@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: ms-checkout-test
+
+aws:
+  region: us-east-1
+  accessKeyId: test-access-key
+  secretAccessKey: test-secret-key
+
+security:
+  users:
+    credentials:
+      - username: admin
+        password: admin123
+        roles:
+          - ADMIN
+          - USER
+      - username: user
+        password: user123
+        roles:
+          - USER
+
+server:
+  port: 0
