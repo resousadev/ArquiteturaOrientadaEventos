@@ -27,8 +27,14 @@ public class AwsConfig {
     public EventBridgeClient eventBridgeClient() {
         log.info("Configurando EventBridgeClient");
         log.info("Região AWS: {}", awsRegion);
-        log.info("Access Key ID: {}...", accessKeyId.substring(0, 4));
-        
+
+        // Proteção contra credenciais vazias
+        if (accessKeyId != null && accessKeyId.length() >= 4) {
+            log.info("Access Key ID: {}...", accessKeyId.substring(0, 4));
+        } else {
+            log.warn("Access Key ID não configurada ou inválida");
+        }
+
         AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(
             accessKeyId,
             secretAccessKey
