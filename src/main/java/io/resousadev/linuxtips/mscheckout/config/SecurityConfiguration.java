@@ -19,10 +19,14 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers("/v1/mscheckout/**")
+            )
+            .httpBasic(httpBasic -> httpBasic.realmName("MS Checkout API"))
             .formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
-                .defaultSuccessUrl("/v1/mscheckout/orders", true)
+                .defaultSuccessUrl("/home", true)
                 .failureUrl("/login?error=true")
                 .permitAll()
             )
@@ -35,7 +39,8 @@ public class SecurityConfiguration {
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/login").permitAll()
-                .requestMatchers("/v1/mscheckout/orders").hasRole("ADMIN")
+                .requestMatchers("/home").authenticated()
+                .requestMatchers("/v1/mscheckout/**").hasAnyRole("ADMIN", "USER")
                 .anyRequest().authenticated()
             )
             .build();

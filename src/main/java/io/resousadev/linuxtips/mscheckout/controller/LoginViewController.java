@@ -10,4 +10,9 @@ public class LoginViewController {
     public String pageLogin() {
         return "login";
     }
+
+    @GetMapping("/home")
+    public String homePage() {
+        return "home";
+    }
 }
