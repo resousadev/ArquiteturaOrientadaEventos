@@ -1,6 +1,9 @@
 spring:
   application:
     name: ms-checkout
+  output:
+    ansi:
+      enabled: ALWAYS
 
 aws:
   region: ${AWS_REGION:us-east-1}
@@ -12,6 +15,8 @@ server:
 
 logging:
   level:
-    io.resousadev.linuxtips.mscheckout: DEBUG
-    software.amazon.awssdk: DEBUG
-    software.amazon.awssdk.request: DEBUG
+    io.resousadev.linuxtips.mscheckout: INFO
+    software.amazon.awssdk: WARN
+    software.amazon.awssdk.request: WARN
+    org.springframework.web: INFO
+    org.springframework.boot: INFO

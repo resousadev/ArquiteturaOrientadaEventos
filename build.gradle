@@ -23,6 +23,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'software.amazon.awssdk:eventbridge:2.38.5'
 	implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+	
+	// Logback with JSON structured logging support
+	implementation 'net.logstash.logback:logstash-logback-encoder:8.0'
 
 	compileOnly 'org.projectlombok:lombok'
   	annotationProcessor 'org.projectlombok:lombok'

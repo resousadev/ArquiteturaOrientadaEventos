@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- ====================================================================== -->
+    <!-- CONFIGURAÇÃO SIMPLIFICADA PARA TESTES                                  -->
+    <!-- Objetivo: Console limpo, sem arquivos, logs mínimos                    -->
+    <!-- ====================================================================== -->
+
+    <property name="TEST_LOG_PATTERN" 
+              value="%d{HH:mm:ss.SSS} %highlight(%-5level){TRACE=blue, DEBUG=cyan, INFO=green, WARN=yellow, ERROR=red} %cyan(%logger{20}) - %msg%n"/>
+
+    <!-- Appender simples para console -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <withJansi>true</withJansi>
+        <encoder>
+            <pattern>${TEST_LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- Logger da aplicação - INFO em testes -->
+    <logger name="io.resousadev.linuxtips.mscheckout" level="INFO"/>
+
+    <!-- AWS SDK - Silencioso em testes -->
+    <logger name="software.amazon.awssdk" level="WARN"/>
+    
+    <!-- Spring - Reduzir ruído -->
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.springframework.boot" level="INFO"/>
+    <logger name="org.springframework.test" level="INFO"/>
+
+    <!-- Root logger -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration>
