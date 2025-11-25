@@ -27,6 +27,10 @@ dependencies {
 	// PostgreSQL Driver
 	runtimeOnly 'org.postgresql:postgresql'
 
+	// Flyway for database migrations
+	implementation 'org.flywaydb:flyway-core'
+	implementation 'org.flywaydb:flyway-database-postgresql'
+
 	// AWS SDK for EventBridge
 	implementation 'software.amazon.awssdk:eventbridge:2.38.5'
 
