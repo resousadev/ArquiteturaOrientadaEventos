@@ -36,7 +36,6 @@ dependencies {
 
 	// MapStruct for object mapping
 	implementation 'org.mapstruct:mapstruct:1.6.3'
-	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
 	// Spring Dotenv for environment variable management
 	implementation 'me.paulschwarz:spring-dotenv:4.0.0'
@@ -46,8 +45,11 @@ dependencies {
 	// Logback with JSON structured logging support
 	implementation 'net.logstash.logback:logstash-logback-encoder:8.0'
 
+	// Lombok - must be before MapStruct annotation processor
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -66,6 +68,7 @@ configurations {
 checkstyle {
 	toolVersion = '10.12.5'
 	configFile = file("${projectDir}/config/checkstyle/checkstyle.xml")
+	configDirectory = file("${projectDir}/config/checkstyle")
 	ignoreFailures = false
 }
 

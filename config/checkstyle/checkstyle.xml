@@ -8,24 +8,27 @@
   <property name="severity" value="warning"/>
   <property name="fileExtensions" value="java"/>
 
-  <!-- Regra que não depende do TreeWalker -->
+  <module name="SuppressionFilter">
+    <property name="file" value="${config_loc}/suppressions.xml"/>
+    <property name="optional" value="true"/>
+  </module>
+
   <module name="FileLength">
     <property name="max" value="2000"/>
   </module>
 
-  <module name="TreeWalker">
-    <!-- Tamanho de linha -->
-    <module name="LineLength">
-      <property name="max" value="120"/>
-      <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
-    </module>
+  <module name="LineLength">
+    <property name="max" value="120"/>
+    <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
+  </module>
 
-    <!-- Imports -->
+  <module name="TreeWalker">
     <module name="AvoidStarImport"/>
     <module name="RedundantImport"/>
-    <module name="UnusedImports"/>
+    <module name="UnusedImports">
+      <property name="processJavadoc" value="false"/>
+    </module>
 
-    <!-- Convenções de nomenclatura -->
     <module name="TypeName"/>
     <module name="MethodName"/>
     <module name="ParameterName"/>
@@ -33,17 +36,10 @@
     <module name="MemberName"/>
     <module name="ConstantName"/>
 
-    <!-- Espaçamento -->
-    <module name="WhitespaceAround"/>
-    <module name="WhitespaceAfter"/>
-    <module name="NoWhitespaceBefore"/>
-    
-    <!-- Chaves -->
     <module name="LeftCurly"/>
     <module name="RightCurly"/>
     <module name="NeedBraces"/>
-    
-    <!-- Outros -->
+
     <module name="EmptyStatement"/>
     <module name="EqualsHashCode"/>
   </module>

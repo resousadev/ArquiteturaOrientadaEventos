@@ -5,11 +5,14 @@
 
 <suppressions>
     <!-- Suppress all checks in test files -->
-    <suppress checks=".*" files=".*[\\/]src[\\/]test[\\/].*"/>
+    <suppress checks=".*" files=".*Test\.java$"/>
+    <suppress checks=".*" files=".*Tests\.java$"/>
+    <suppress checks=".*" files=".*/test/.*"/>
     
-    <!-- Suppress specific checks for generated files -->
-    <suppress checks=".*" files=".*[\\/]build[\\/]generated[\\/].*"/>
+    <!-- Suppress all checks in generated files -->
+    <suppress checks=".*" files=".*/build/.*"/>
+    <suppress checks=".*" files=".*/generated/.*"/>
     
-    <!-- Suppress line length for imports -->
-    <suppress checks="LineLength" files=".*\.java" lines="1-50"/>
+    <!-- Suppress line length for long annotations -->
+    <suppress checks="LineLength" files=".*\.java$" lines="1-30"/>
 </suppressions>
