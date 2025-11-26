@@ -14,14 +14,14 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public void salvarUsuario(Usuario usuario) {
+    public void salvarUsuario(final Usuario usuario) {
         // Criptografa a senha antes de salvar
         String senhaCriptografada = passwordEncoder.encode(usuario.getSenha());
         usuario.setSenha(senhaCriptografada);
         usuarioRepository.save(usuario);
     }
 
-    public Usuario buscarPorLogin(String login) {
+    public Usuario buscarPorLogin(final String login) {
         return usuarioRepository.findByLogin(login);
     }
 

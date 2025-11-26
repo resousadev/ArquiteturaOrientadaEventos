@@ -36,6 +36,11 @@
     <module name="MemberName"/>
     <module name="ConstantName"/>
 
+    <!-- Enforce 'final' modifier on method and constructor parameters -->
+    <module name="FinalParameters">
+      <property name="tokens" value="METHOD_DEF, CTOR_DEF"/>
+    </module>
+
     <module name="LeftCurly"/>
     <module name="RightCurly"/>
     <module name="NeedBraces"/>

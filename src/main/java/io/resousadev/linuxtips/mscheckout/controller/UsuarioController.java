@@ -23,7 +23,7 @@ public class UsuarioController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void salvarUsuario(@RequestBody UsuarioDTO usuarioDTO) {
+    public void salvarUsuario(@RequestBody final UsuarioDTO usuarioDTO) {
         Usuario usuario = usuarioMapper.toEntity(usuarioDTO);
         usuarioService.salvarUsuario(usuario);
     }

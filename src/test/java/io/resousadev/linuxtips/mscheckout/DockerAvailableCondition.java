@@ -21,7 +21,7 @@ public class DockerAvailableCondition implements ExecutionCondition {
             "Docker is not available. Start Docker Desktop to run integration tests.");
 
     @Override
-    public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
+    public ConditionEvaluationResult evaluateExecutionCondition(final ExtensionContext context) {
         return isDockerAvailable() ? ENABLED : DISABLED;
     }
 

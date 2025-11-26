@@ -17,7 +17,7 @@ public class CheckoutController {
     private final EventBridgeProducer eventBridgeProducer;
 
     @PostMapping("/orders")
-    public void finishOrder(@RequestBody Payment payment) {
+    public void finishOrder(@RequestBody final Payment payment) {
         eventBridgeProducer.finishOrder(payment);
     }
 
