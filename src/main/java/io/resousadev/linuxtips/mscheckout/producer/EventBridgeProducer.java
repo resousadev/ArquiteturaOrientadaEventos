@@ -17,7 +17,7 @@ public class EventBridgeProducer {
 
     private final EventBridgeClient eventBridgeClient;
 
-    public void finishOrder(Payment payment) {
+    public void finishOrder(final Payment payment) {
         log.info("=== ENVIANDO EVENTO PARA EVENTBRIDGE ===");
         log.debug("Payment: {}", payment);
         log.debug("Event Bus: status-pedido-bus");

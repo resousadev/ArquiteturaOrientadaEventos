@@ -41,7 +41,7 @@ public class LoggingFilter implements Filter {
     private static final String REQUEST_METHOD_MDC_KEY = "requestMethod";
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+    public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
         
         if (!(request instanceof HttpServletRequest)) {
