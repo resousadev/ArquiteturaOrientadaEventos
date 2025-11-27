@@ -55,20 +55,6 @@ public class SecurityConfiguration {
 
     @Bean
     public UserDetailsService userDetailsService(final UsuarioService usuarioService) {
-        // UserDetails admin = User.builder()
-        //     .username("admin")
-        //     .password(passwordEncoder.encode("admin123"))
-        //     .roles("ADMIN", "USER")
-        //     .build();
-
-        // UserDetails user = User.builder()
-        //     .username("user")
-        //     .password(passwordEncoder.encode("user123"))
-        //     .roles("USER")
-        //     .build();
-
-        // return new InMemoryUserDetailsManager(admin, user);
-
         return new CustomUserDetailsService(usuarioService);
     }
 
