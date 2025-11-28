@@ -3,16 +3,32 @@
   "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
   "https://checkstyle.org/dtds/configuration_1_3.dtd">
 
+<!--
+  Checkstyle Configuration for ms-checkout
+  Version: 2.0
+  Updated: 2025-11-28
+  
+  Rules include:
+  - File and line length limits
+  - Import organization
+  - Naming conventions
+  - Code style (braces, modifiers)
+  - Best practices (MagicNumber, IllegalImport, etc.)
+  - Javadoc requirements for public APIs
+-->
+
 <module name="Checker">
   <property name="charset" value="UTF-8"/>
   <property name="severity" value="warning"/>
   <property name="fileExtensions" value="java"/>
 
+  <!-- Suppression Filter -->
   <module name="SuppressionFilter">
     <property name="file" value="${config_loc}/suppressions.xml"/>
     <property name="optional" value="true"/>
   </module>
 
+  <!-- ===== File-Level Checks ===== -->
   <module name="FileLength">
     <property name="max" value="2000"/>
   </module>
@@ -22,30 +38,119 @@
     <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
   </module>
 
+  <!-- Require newline at end of file -->
+  <module name="NewlineAtEndOfFile"/>
+
   <module name="TreeWalker">
+    <!-- ===== Import Checks ===== -->
     <module name="AvoidStarImport"/>
     <module name="RedundantImport"/>
     <module name="UnusedImports">
       <property name="processJavadoc" value="false"/>
     </module>
+    
+    <!-- Block sun.* and internal JDK packages -->
+    <module name="IllegalImport">
+      <property name="illegalPkgs" value="sun, com.sun"/>
+    </module>
 
+    <!-- ===== Naming Conventions ===== -->
     <module name="TypeName"/>
     <module name="MethodName"/>
     <module name="ParameterName"/>
     <module name="LocalVariableName"/>
     <module name="MemberName"/>
     <module name="ConstantName"/>
-
-    <!-- Enforce 'final' modifier on method and constructor parameters -->
-    <module name="FinalParameters">
-      <property name="tokens" value="METHOD_DEF, CTOR_DEF"/>
+    <module name="PackageName">
+      <property name="format" value="^[a-z]+(\.[a-z_][a-z0-9_]*)*$"/>
     </module>
 
+    <!-- ===== Modifier Checks ===== -->
+    <!-- Enforce correct modifier order: public protected private abstract default static final transient volatile synchronized native strictfp -->
+    <module name="ModifierOrder"/>
+    
+    <!-- Enforce 'final' modifier on method and constructor parameters -->
+    <!-- Severity set to info for Spring applications where final parameters are not commonly used -->
+    <module name="FinalParameters">
+      <property name="tokens" value="METHOD_DEF, CTOR_DEF"/>
+      <property name="severity" value="info"/>
+    </module>
+    
+    <!-- Flag redundant modifiers -->
+    <module name="RedundantModifier"/>
+
+    <!-- ===== Code Style ===== -->
     <module name="LeftCurly"/>
     <module name="RightCurly"/>
     <module name="NeedBraces"/>
+    
+    <!-- Consistent whitespace -->
+    <module name="WhitespaceAround">
+      <property name="allowEmptyConstructors" value="true"/>
+      <property name="allowEmptyMethods" value="true"/>
+      <property name="allowEmptyTypes" value="true"/>
+      <property name="allowEmptyLoops" value="true"/>
+    </module>
+    
+    <!-- One statement per line -->
+    <module name="OneStatementPerLine"/>
 
+    <!-- ===== Best Practices ===== -->
     <module name="EmptyStatement"/>
     <module name="EqualsHashCode"/>
+    
+    <!-- Avoid magic numbers - must use named constants -->
+    <module name="MagicNumber">
+      <property name="ignoreNumbers" value="-1, 0, 1, 2"/>
+      <property name="ignoreHashCodeMethod" value="true"/>
+      <property name="ignoreAnnotation" value="true"/>
+      <property name="ignoreFieldDeclaration" value="false"/>
+      <property name="constantWaiverParentToken" value="TYPECAST, METHOD_CALL, EXPR, ARRAY_INIT, UNARY_MINUS, UNARY_PLUS, ELIST, STAR, ASSIGN, PLUS, MINUS, DIV, LITERAL_NEW"/>
+    </module>
+    
+    <!-- Use .equals() for String comparison -->
+    <module name="StringLiteralEquality"/>
+    
+    <!-- Simplify boolean expressions -->
+    <module name="SimplifyBooleanExpression"/>
+    <module name="SimplifyBooleanReturn"/>
+    
+    <!-- Default case required in switch -->
+    <!-- Severity set to info for modern Java features like sealed types and exhaustive switch expressions -->
+    <module name="MissingSwitchDefault">
+      <property name="severity" value="info"/>
+    </module>
+    
+    <!-- Avoid nested blocks -->
+    <module name="AvoidNestedBlocks"/>
+    
+    <!-- Fall through in switch must be commented -->
+    <module name="FallThrough"/>
+
+    <!-- ===== Javadoc Checks ===== -->
+    <!-- Require Javadoc on public methods (except getters/setters) -->
+    <module name="MissingJavadocMethod">
+      <property name="scope" value="public"/>
+      <property name="minLineCount" value="2"/>
+      <property name="allowedAnnotations" value="Override, Bean, PostConstruct, PreDestroy, GetMapping, PostMapping, PutMapping, DeleteMapping, PatchMapping, RequestMapping, ExceptionHandler, Scheduled"/>
+      <property name="allowMissingPropertyJavadoc" value="true"/>
+    </module>
+    
+    <!-- Require Javadoc on public types -->
+    <module name="MissingJavadocType">
+      <property name="scope" value="public"/>
+      <property name="skipAnnotations" value="SpringBootApplication, Configuration, RestController, Controller, Service, Repository, Component, Entity, Mapper"/>
+    </module>
+
+    <!-- ===== Annotation Checks ===== -->
+    <!-- Require @Override annotation -->
+    <module name="MissingOverride"/>
+    
+    <!-- Annotation location -->
+    <module name="AnnotationLocation">
+      <property name="allowSamelineMultipleAnnotations" value="false"/>
+      <property name="allowSamelineSingleParameterlessAnnotation" value="true"/>
+      <property name="allowSamelineParameterizedAnnotation" value="false"/>
+    </module>
   </module>
 </module>

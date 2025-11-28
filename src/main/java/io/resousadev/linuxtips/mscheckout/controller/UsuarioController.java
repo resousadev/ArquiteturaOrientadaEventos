@@ -21,6 +21,11 @@ public class UsuarioController {
     private final UsuarioService usuarioService;
     private final UsuarioMapper usuarioMapper;
 
+    /**
+     * Endpoint para cadastrar um novo usuário.
+     *
+     * @param usuarioDTO dados do usuário a ser cadastrado
+     */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public void salvarUsuario(@RequestBody final UsuarioDTO usuarioDTO) {
