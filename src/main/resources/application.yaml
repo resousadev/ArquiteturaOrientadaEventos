@@ -41,6 +41,7 @@ eventbridge:
 sqs:
   queue:
     name: ${SQS_QUEUE_NAME:checkout-events-queue}
+    # SQS Queue URL - will be used by SQS consumer (to be implemented)
     url: ${SQS_QUEUE_URL:}
 
 server:
