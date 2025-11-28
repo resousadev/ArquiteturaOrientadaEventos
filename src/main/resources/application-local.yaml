@@ -1,0 +1,76 @@
+# ===========================================
+# MS-CHECKOUT - Local Development Profile
+# ===========================================
+# This profile is used for local development with LocalStack
+# Activate with: SPRING_PROFILES_ACTIVE=local
+
+spring:
+  application:
+    name: ms-checkout
+
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:checkout_db}?currentSchema=${POSTGRES_SCHEMA:checkout}
+    username: ${POSTGRES_USER:checkout_user}
+    password: ${POSTGRES_PASSWORD:checkout_pass}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: ${POSTGRES_SCHEMA:checkout}
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    schemas: ${POSTGRES_SCHEMA:checkout}
+    default-schema: ${POSTGRES_SCHEMA:checkout}
+
+# -------------------------------------------
+# AWS Configuration for LocalStack
+# -------------------------------------------
+aws:
+  region: ${AWS_REGION:us-east-1}
+  accessKeyId: ${AWS_ACCESS_KEY_ID:test}
+  secretAccessKey: ${AWS_SECRET_ACCESS_KEY:test}
+  # LocalStack endpoint - remove or leave empty for real AWS
+  endpoint: ${AWS_ENDPOINT:http://localhost:4566}
+
+# -------------------------------------------
+# EventBridge Configuration
+# -------------------------------------------
+eventbridge:
+  bus-name: ${EVENTBRIDGE_BUS_NAME:status-pedido-bus}
+
+# -------------------------------------------
+# SQS Configuration
+# -------------------------------------------
+sqs:
+  queue:
+    name: ${SQS_QUEUE_NAME:checkout-events-queue}
+    url: ${SQS_QUEUE_URL:http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/checkout-events-queue}
+
+# -------------------------------------------
+# Server Configuration
+# -------------------------------------------
+server:
+  port: ${SERVER_PORT:8080}
+
+# -------------------------------------------
+# Logging Configuration (verbose for local dev)
+# -------------------------------------------
+logging:
+  level:
+    root: INFO
+    io.resousadev.linuxtips.mscheckout: DEBUG
+    software.amazon.awssdk: INFO
+    software.amazon.awssdk.request: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.boot: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql: TRACE
