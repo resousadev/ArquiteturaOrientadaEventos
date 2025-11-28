@@ -9,6 +9,9 @@ import io.resousadev.linuxtips.mscheckout.model.Usuario;
 import io.resousadev.linuxtips.mscheckout.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Serviço customizado para carregar detalhes do usuário para autenticação Spring Security.
+ */
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 

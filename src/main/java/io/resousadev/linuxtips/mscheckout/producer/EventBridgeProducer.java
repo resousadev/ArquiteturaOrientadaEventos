@@ -17,6 +17,11 @@ public class EventBridgeProducer {
 
     private final EventBridgeClient eventBridgeClient;
 
+    /**
+     * Finaliza um pedido enviando evento para o AWS EventBridge.
+     *
+     * @param payment dados do pagamento a ser publicado como evento
+     */
     public void finishOrder(final Payment payment) {
         log.info("=== ENVIANDO EVENTO PARA EVENTBRIDGE ===");
         log.debug("Payment: {}", payment);

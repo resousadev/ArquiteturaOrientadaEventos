@@ -107,7 +107,11 @@ tasks.register('checkstyleReport') {
 	group = 'verification'
 	description = 'Runs all checkstyle tasks and generates reports'
 	dependsOn checkstyleMain, checkstyleTest
-// JaCoCo Configuration
+}
+
+// =============================================
+// JaCoCo - Code Coverage Configuration
+// =============================================
 jacoco {
 	toolVersion = '0.8.12'
 }
