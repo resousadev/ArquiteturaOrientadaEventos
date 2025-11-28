@@ -70,8 +70,10 @@
     <module name="ModifierOrder"/>
     
     <!-- Enforce 'final' modifier on method and constructor parameters -->
+    <!-- Severity set to info for Spring applications where final parameters are not commonly used -->
     <module name="FinalParameters">
       <property name="tokens" value="METHOD_DEF, CTOR_DEF"/>
+      <property name="severity" value="info"/>
     </module>
     
     <!-- Flag redundant modifiers -->
@@ -114,7 +116,10 @@
     <module name="SimplifyBooleanReturn"/>
     
     <!-- Default case required in switch -->
-    <module name="MissingSwitchDefault"/>
+    <!-- Severity set to info for modern Java features like sealed types and exhaustive switch expressions -->
+    <module name="MissingSwitchDefault">
+      <property name="severity" value="info"/>
+    </module>
     
     <!-- Avoid nested blocks -->
     <module name="AvoidNestedBlocks"/>
