@@ -34,4 +34,8 @@
     <!-- ===== FinalParameters Exception ===== -->
     <!-- Suppress FinalParameters for Lombok-generated classes -->
     <suppress checks="FinalParameters" files=".*Builder\.java$"/>
+    <!-- Suppress FinalParameters for common Spring components -->
+    <suppress checks="FinalParameters" files=".*Controller\.java$"/>
+    <suppress checks="FinalParameters" files=".*Service\.java$"/>
+    <suppress checks="FinalParameters" files=".*Config\.java$"/>
 </suppressions>
