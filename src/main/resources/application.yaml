@@ -32,6 +32,17 @@ aws:
   region: ${AWS_REGION:us-east-1}
   accessKeyId: ${AWS_ACCESS_KEY_ID}
   secretAccessKey: ${AWS_SECRET_ACCESS_KEY}
+  # Endpoint override for LocalStack (leave empty for real AWS)
+  endpoint: ${AWS_ENDPOINT:}
+
+eventbridge:
+  bus-name: ${EVENTBRIDGE_BUS_NAME:status-pedido-bus}
+
+sqs:
+  queue:
+    name: ${SQS_QUEUE_NAME:checkout-events-queue}
+    # SQS Queue URL - will be used by SQS consumer (to be implemented)
+    url: ${SQS_QUEUE_URL:}
 
 server:
   port: ${SERVER_PORT:8080}
