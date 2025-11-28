@@ -93,20 +93,41 @@ tasks.withType(Checkstyle) {
 	}
 }
 
-// =============================================
-// JaCoCo - Code Coverage Configuration
-// =============================================
+// JaCoCo Configuration
 jacoco {
 	toolVersion = '0.8.12'
 }
 
+// Classes to exclude from coverage
+def jacocoExcludes = [
+	// Main application class
+	'**/MsCheckoutApplication.class',
+	'**/MsCheckoutApplication$*.class',
+	// Configuration classes
+	'**/config/**',
+	// DTOs and Records (no logic)
+	'**/dto/**',
+	// Model/Entities (JPA/Record managed - no logic to test)
+	'**/model/**',
+	// MapStruct generated mappers
+	'**/mappers/*Impl.class',
+	// Exceptions (trivial)
+	'**/exception/**'
+]
+
 tasks.named('test') {
-	useJUnitPlatform()
 	finalizedBy jacocoTestReport
 }
 
 jacocoTestReport {
 	dependsOn test
+	
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, excludes: jacocoExcludes)
+		}))
+	}
+	
 	reports {
 		xml.required = true
 		html.required = true
@@ -115,6 +136,12 @@ jacocoTestReport {
 }
 
 jacocoTestCoverageVerification {
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, excludes: jacocoExcludes)
+		}))
+	}
+	
 	violationRules {
 		rule {
 			limit {
@@ -123,10 +150,6 @@ jacocoTestCoverageVerification {
 		}
 		rule {
 			element = 'CLASS'
-			excludes = [
-				'io.resousadev.linuxtips.mscheckout.MsCheckoutApplication',
-				'io.resousadev.linuxtips.mscheckout.config.*'
-			]
 			limit {
 				counter = 'LINE'
 				value = 'COVEREDRATIO'
