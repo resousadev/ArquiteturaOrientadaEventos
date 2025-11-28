@@ -14,6 +14,11 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * Salva um novo usuário no sistema com senha criptografada.
+     *
+     * @param usuario entidade usuário a ser persistida
+     */
     public void salvarUsuario(final Usuario usuario) {
         // Criptografa a senha antes de salvar
         String senhaCriptografada = passwordEncoder.encode(usuario.getSenha());

@@ -79,11 +79,16 @@ configurations {
     }
 }
 
+// =============================================
+// Checkstyle - Code Style Configuration
+// =============================================
 checkstyle {
 	toolVersion = '10.12.5'
 	configFile = file("${projectDir}/config/checkstyle/checkstyle.xml")
 	configDirectory = file("${projectDir}/config/checkstyle")
 	ignoreFailures = false
+	showViolations = true
+	maxWarnings = 0
 }
 
 tasks.withType(Checkstyle) {
@@ -93,7 +98,16 @@ tasks.withType(Checkstyle) {
 	}
 }
 
-// JaCoCo Configuration
+// Aggregated checkstyle task for convenience
+tasks.register('checkstyleReport') {
+	group = 'verification'
+	description = 'Runs all checkstyle tasks and generates reports'
+	dependsOn checkstyleMain, checkstyleTest
+}
+
+// =============================================
+// JaCoCo - Code Coverage Configuration
+// =============================================
 jacoco {
 	toolVersion = '0.8.12'
 }
