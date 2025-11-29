@@ -1,13 +1,17 @@
 # ms-checkout
 
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.7-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.java.net/)
-[![Gradle](https://img.shields.io/badge/Gradle-8.x-blue.svg)](https://gradle.org/)
-[![AWS SDK](https://img.shields.io/badge/AWS%20SDK-2.38.5-yellow.svg)](https://aws.amazon.com/sdk-for-java/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue.svg)](https://www.postgresql.org/)
-[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED.svg)](https://docs.docker.com/compose/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.7-6DB33F.svg?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Java](https://img.shields.io/badge/Java-21-ED8B00.svg?logo=openjdk&logoColor=white)](https://openjdk.java.net/)
+[![Gradle](https://img.shields.io/badge/Gradle-8.x-02303A.svg?logo=gradle&logoColor=white)](https://gradle.org/)
+[![AWS SDK](https://img.shields.io/badge/AWS%20SDK-2.38.5-FF9900.svg?logo=amazonaws&logoColor=white)](https://aws.amazon.com/sdk-for-java/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1.svg?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED.svg?logo=docker&logoColor=white)](https://docs.docker.com/compose/)
+[![LocalStack](https://img.shields.io/badge/LocalStack-AWS%20Emulator-5C4EE5.svg?logo=amazonaws&logoColor=white)](https://localstack.cloud/)
+[![JaCoCo](https://img.shields.io/badge/JaCoCo-80%25%20Coverage-success.svg?logo=codecov&logoColor=white)](https://www.jacoco.org/)
+[![Checkstyle](https://img.shields.io/badge/Checkstyle-10.12.5-4A90E2.svg?logo=checkmarx&logoColor=white)](https://checkstyle.org/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Microserviço de checkout desenvolvido com Spring Boot 3.5.7, parte de uma arquitetura orientada a eventos utilizando serviços nativos da AWS.
+Microserviço de checkout desenvolvido com Spring Boot 3.5.7, parte de uma arquitetura orientada a eventos utilizando serviços nativos da AWS (EventBridge + SQS).
 
 ## 📋 Índice
 
@@ -68,6 +72,8 @@ Este microserviço faz parte do projeto **ArquiteturaOrientadaEventos**, que dem
 | Tecnologia | Versão | Descrição |
 |------------|--------|-----------|
 | AWS SDK EventBridge | 2.38.5 | Publicação de eventos |
+| AWS SDK SQS | 2.38.5 | Fila de mensagens |
+| LocalStack | latest | Emulador AWS local |
 
 ### Utilitários
 | Tecnologia | Versão | Descrição |
@@ -83,6 +89,7 @@ Este microserviço faz parte do projeto **ArquiteturaOrientadaEventos**, que dem
 | JUnit 5 | - | Framework de testes |
 | Testcontainers | - | Testes de integração com Docker |
 | Checkstyle | 10.12.5 | Análise estática de código |
+| JaCoCo | 0.8.12 | Cobertura de código (mínimo 80%) |
 
 ## 📦 Pré-requisitos
 
@@ -91,16 +98,15 @@ Antes de começar, você precisará ter instalado em sua máquina:
 - [Java 21](https://adoptium.net/) ou superior
 - [Docker](https://www.docker.com/) e Docker Compose
 - [Git](https://git-scm.com)
-- Conta AWS configurada (para recursos de EventBridge)
 
-> **Nota:** Gradle 8.x é opcional, pois o projeto usa Gradle Wrapper.
+> **Nota:** Gradle 8.x é opcional, pois o projeto usa Gradle Wrapper. LocalStack emula os serviços AWS localmente.
 
 ## 🔧 Instalação
 
 ### 1. Clone o repositório
 
 ```powershell
-git clone git@gh-resousadev:resousadev/ArquiteturaOrientadaEventos.git
+git clone git@github.com:resousadev/ArquiteturaOrientadaEventos.git
 cd ms-checkout
 ```
 
@@ -238,32 +244,37 @@ ms-checkout/
 ├── src/
 │   ├── main/
 │   │   ├── java/io/resousadev/linuxtips/mscheckout/
-│   │   │   ├── MsCheckoutApplication.java
+│   │   │   ├── MsCheckoutApplication.java       # Entry point
 │   │   │   ├── config/
-│   │   │   │   ├── AwsConfig.java            # Cliente EventBridge
-│   │   │   │   ├── SecurityConfig.java       # Spring Security
-│   │   │   │   ├── CorrelationIdFilter.java  # Rastreamento de requests
-│   │   │   │   └── WebConfig.java            # Configuração MVC
+│   │   │   │   ├── AwsConfig.java               # Cliente EventBridge (LocalStack support)
+│   │   │   │   ├── LoggingFilter.java           # Correlation ID injection (MDC)
+│   │   │   │   ├── SecurityConfiguration.java   # Spring Security (form login, BCrypt)
+│   │   │   │   └── WebConfiguration.java        # Configuração MVC
 │   │   │   ├── controller/
-│   │   │   │   ├── CheckoutController.java   # API de checkout
-│   │   │   │   ├── UsuarioController.java    # CRUD de usuários
-│   │   │   │   └── WebController.java        # Views Thymeleaf
-│   │   │   ├── service/
-│   │   │   │   └── UsuarioService.java       # Lógica de usuários
-│   │   │   ├── repository/
-│   │   │   │   └── UsuarioRepository.java    # JPA Repository
-│   │   │   ├── domain/
-│   │   │   │   ├── Usuario.java              # Entidade JPA
-│   │   │   │   └── PagamentoEvent.java       # Evento de pagamento
+│   │   │   │   ├── CheckoutController.java      # POST /v1/mscheckout/orders
+│   │   │   │   ├── LoginViewController.java     # /login, /home (Thymeleaf views)
+│   │   │   │   └── UsuarioController.java       # POST /usuarios (user registration)
 │   │   │   ├── dto/
-│   │   │   │   └── UsuarioDTO.java           # DTO de usuário
-│   │   │   ├── mapper/
-│   │   │   │   └── UsuarioMapper.java        # MapStruct mapper
-│   │   │   └── producer/
-│   │   │       └── PagamentoEventProducer.java  # Publisher EventBridge
+│   │   │   │   └── UsuarioDTO.java              # User data transfer record
+│   │   │   ├── exception/
+│   │   │   │   └── UsuarioNotFoundException.java # Custom exception
+│   │   │   ├── mappers/
+│   │   │   │   └── UsuarioMapper.java           # MapStruct mapper (DTO → Entity)
+│   │   │   ├── model/
+│   │   │   │   ├── Payment.java                 # Payment record (origem, valor, status)
+│   │   │   │   └── Usuario.java                 # JPA entity (UUID, login, senha, roles)
+│   │   │   ├── producer/
+│   │   │   │   └── EventBridgeProducer.java     # Publishes events to EventBridge
+│   │   │   ├── repository/
+│   │   │   │   └── UsuarioRepository.java       # JPA repository with findByLogin()
+│   │   │   ├── security/
+│   │   │   │   └── CustomUserDetailsService.java # Loads users from database
+│   │   │   └── service/
+│   │   │       └── UsuarioService.java          # User service with BCrypt encoding
 │   │   └── resources/
 │   │       ├── application.yaml
-│   │       ├── logback-spring.xml
+│   │       ├── application-local.yaml           # LocalStack configuration
+│   │       ├── logback-spring.xml               # Structured logging (JSON + File)
 │   │       ├── db/migration/
 │   │       │   ├── V1__create_schema.sql
 │   │       │   └── V2__create_usuarios_table.sql
@@ -272,15 +283,32 @@ ms-checkout/
 │   │           └── home.html
 │   └── test/
 │       ├── java/io/resousadev/linuxtips/mscheckout/
+│       │   ├── AbstractIntegrationTest.java     # Base class with PostgreSQL Testcontainers
+│       │   ├── DockerAvailableCondition.java    # JUnit 5 extension for Docker check
 │       │   ├── MsCheckoutApplicationTests.java
-│       │   └── config/
-│       │       └── DockerAvailableCondition.java
+│       │   ├── config/
+│       │   ├── controller/
+│       │   │   ├── CheckoutControllerTest.java
+│       │   │   ├── LoginViewControllerTest.java
+│       │   │   └── UsuarioControllerTest.java
+│       │   ├── producer/
+│       │   │   └── EventBridgeProducerTest.java
+│       │   ├── security/
+│       │   │   └── CustomUserDetailsServiceTest.java
+│       │   └── service/
+│       │       └── UsuarioServiceTest.java
 │       └── resources/
 │           ├── application-test.yaml
 │           └── logback-test.xml
 ├── config/checkstyle/
 │   ├── checkstyle.xml
 │   └── suppressions.xml
+├── localstack/
+│   └── init-aws.sh                              # AWS resources init script
+├── scripts/
+│   ├── pre-commit                               # Git hook (Checkstyle validation)
+│   ├── install-hooks.ps1                        # Windows hook installer
+│   └── install-hooks.sh                         # Unix hook installer
 ├── docker-compose.yml
 ├── build.gradle
 ├── settings.gradle
@@ -300,38 +328,72 @@ package io.resousadev.linuxtips.mscheckout;
 ### Arquitetura Orientada a Eventos com AWS
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                      ms-checkout                             │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────────┐  │
-│  │  Controller │───→│   Service   │───→│   Repository    │  │
-│  └─────────────┘    └─────────────┘    └─────────────────┘  │
-│         │                                       │            │
-│         │                                       ▼            │
-│         │                              ┌─────────────────┐  │
-│         │                              │   PostgreSQL    │  │
-│         │                              └─────────────────┘  │
-│         ▼                                                    │
-│  ┌─────────────────┐                                        │
-│  │ PagamentoEvent  │                                        │
-│  │    Producer     │                                        │
-│  └────────┬────────┘                                        │
-└───────────┼─────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                                  ms-checkout                                     │
+│                                                                                  │
+│  ┌──────────────┐     ┌──────────────┐     ┌─────────────────┐                  │
+│  │  Controller  │────▶│   Service    │────▶│   Repository    │                  │
+│  │              │     │              │     │                 │                  │
+│  │ • Checkout   │     │ • Usuario    │     │ • Usuario       │                  │
+│  │ • Usuario    │     │              │     │                 │                  │
+│  │ • LoginView  │     └──────────────┘     └────────┬────────┘                  │
+│  └──────┬───────┘                                   │                           │
+│         │                                           ▼                           │
+│         │                                  ┌─────────────────┐                  │
+│         │                                  │   PostgreSQL    │                  │
+│         │                                  │   (checkout)    │                  │
+│         ▼                                  └─────────────────┘                  │
+│  ┌──────────────────┐                                                           │
+│  │ EventBridge      │                                                           │
+│  │ Producer         │                                                           │
+│  └────────┬─────────┘                                                           │
+└───────────┼─────────────────────────────────────────────────────────────────────┘
             │
             ▼
-   ┌──────────────────┐
-   │ Amazon           │
-   │ EventBridge      │
-   │ (checkout-events)│
-   └──────────────────┘
+   ┌────────────────────┐         ┌──────────────────────────────────────────────┐
+   │  Amazon            │         │              EventBridge Rule                 │
+   │  EventBridge       │────────▶│         (checkout-to-sqs-rule)               │
+   │  (checkout-events) │         │                                              │
+   └────────────────────┘         └──────────────────────┬───────────────────────┘
+                                                         │
+                                                         ▼
+                                  ┌──────────────────────────────────────────────┐
+                                  │              Amazon SQS                       │
+                                  │         (checkout-events-queue)              │
+                                  │                    │                          │
+                                  │     On Failure     ▼                          │
+                                  │            ┌───────────────┐                  │
+                                  │            │  Dead Letter  │                  │
+                                  │            │    Queue      │                  │
+                                  │            │ (checkout-    │                  │
+                                  │            │  events-dlq)  │                  │
+                                  │            └───────────────┘                  │
+                                  └──────────────────────────────────────────────┘
+                                                         │
+                                                         ▼
+                                  ┌──────────────────────────────────────────────┐
+                                  │              CloudWatch Logs                  │
+                                  │         (/ms-checkout/events)                │
+                                  └──────────────────────────────────────────────┘
 ```
 
-**Componentes Implementados:**
+### Fluxo de Eventos
 
-- **Controllers**: REST API e views Thymeleaf
-- **Services**: Lógica de negócio com validação
-- **Repositories**: Persistência com Spring Data JPA
-- **Event Producers**: Publicação de eventos no EventBridge
-- **Security**: Autenticação e autorização com Spring Security
+1. **Checkout Request** → Controller recebe requisição de pagamento
+2. **Event Publishing** → EventBridgeProducer publica evento no bus `checkout-events`
+3. **Event Routing** → EventBridge rule roteia para SQS queue
+4. **Message Processing** → Consumer processa mensagens (a implementar)
+5. **Error Handling** → Mensagens com falha vão para DLQ
+6. **Observability** → CloudWatch Logs registra todos os eventos
+
+### Componentes Implementados
+
+- ✅ **Controllers**: REST API e views Thymeleaf
+- ✅ **Services**: Lógica de negócio com validação e BCrypt
+- ✅ **Repositories**: Persistência com Spring Data JPA
+- ✅ **Event Producers**: Publicação de eventos no EventBridge
+- ✅ **Security**: Autenticação Form Login + HTTP Basic
+- ✅ **Logging**: Structured JSON logging com Correlation ID
 
 ### Próximos Passos
 
@@ -344,19 +406,31 @@ package io.resousadev.linuxtips.mscheckout;
 
 ### Configuração
 
-O projeto utiliza PostgreSQL 15 com Flyway para migrações.
+O projeto utiliza PostgreSQL 15 com Flyway para migrações e LocalStack para emular serviços AWS.
 
-**Docker Compose:**
+**Docker Compose (PostgreSQL + LocalStack):**
 ```powershell
-# Iniciar banco de dados
+# Iniciar infraestrutura completa
 docker-compose up -d
 
-# Parar banco de dados
+# Verificar status
+docker-compose ps
+
+# Parar serviços
 docker-compose down
 
 # Parar e remover volumes
 docker-compose down -v
 ```
+
+**Recursos AWS criados pelo LocalStack:**
+| Recurso | Nome | Descrição |
+|---------|------|-----------|
+| EventBridge Bus | `checkout-events` | Barramento de eventos |
+| SQS Queue | `checkout-events-queue` | Fila de processamento |
+| SQS DLQ | `checkout-events-dlq` | Dead Letter Queue |
+| EventBridge Rule | `checkout-to-sqs-rule` | Roteamento de eventos |
+| CloudWatch Logs | `/ms-checkout/events` | Log de eventos |
 
 ### Migrações
 
@@ -382,7 +456,7 @@ usuario_roles
 
 ## ✅ Testes
 
-O projeto utiliza JUnit 5 e Testcontainers para testes de integração.
+O projeto utiliza JUnit 5 e Testcontainers para testes de integração com cobertura mínima de **80%** (JaCoCo).
 
 ### Executar testes
 
@@ -395,6 +469,9 @@ O projeto utiliza JUnit 5 e Testcontainers para testes de integração.
 
 # Executar testes específicos
 .\gradlew.bat test --tests "MsCheckoutApplicationTests"
+
+# Verificar cobertura de código
+.\gradlew.bat jacocoTestCoverageVerification
 ```
 
 ### Testcontainers
@@ -406,7 +483,29 @@ Se Docker não estiver disponível, os testes serão automaticamente ignorados (
 ### Relatórios
 
 Após a execução dos testes, os relatórios estarão disponíveis em:
-- `build/reports/tests/test/index.html`
+- **Testes**: `build/reports/tests/test/index.html`
+- **Cobertura (JaCoCo)**: `build/reports/jacoco/test/html/index.html`
+- **Checkstyle**: `build/reports/checkstyle/main.html`
+
+## 🔧 Git Hooks
+
+O projeto inclui Git hooks para garantir qualidade de código antes dos commits.
+
+### Instalação
+
+```powershell
+# Windows
+.\scripts\install-hooks.ps1
+
+# Unix/Linux/macOS
+./scripts/install-hooks.sh
+```
+
+### Pre-commit Hook
+
+O hook `pre-commit` executa automaticamente:
+- ✅ Checkstyle nos arquivos Java modificados
+- ❌ Bloqueia commit se houver violações
 
 ## 🤝 Contribuindo
 
