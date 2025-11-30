@@ -256,8 +256,6 @@ ms-checkout/
 │   │   │   │   └── UsuarioController.java       # POST /usuarios (user registration)
 │   │   │   ├── dto/
 │   │   │   │   └── UsuarioDTO.java              # User data transfer record
-│   │   │   ├── exception/
-│   │   │   │   └── UsuarioNotFoundException.java # Custom exception
 │   │   │   ├── mappers/
 │   │   │   │   └── UsuarioMapper.java           # MapStruct mapper (DTO → Entity)
 │   │   │   ├── model/
