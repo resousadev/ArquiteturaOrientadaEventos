@@ -39,6 +39,7 @@ Este microserviço faz parte do projeto **ArquiteturaOrientadaEventos**, que dem
 - ✅ Interface web com Thymeleaf (login/home)
 - ✅ Logging estruturado em JSON com Logstash
 - ✅ Testes de integração com Testcontainers
+- ✅ Consumo de eventos do Amazon SQS com long polling
 
 ## 🚀 Tecnologias
 
@@ -68,6 +69,7 @@ Este microserviço faz parte do projeto **ArquiteturaOrientadaEventos**, que dem
 | Tecnologia | Versão | Descrição |
 |------------|--------|-----------|
 | AWS SDK EventBridge | 2.38.5 | Publicação de eventos |
+| AWS SDK SQS | 2.38.5 | Consumo de mensagens |
 
 ### Utilitários
 | Tecnologia | Versão | Descrição |
@@ -259,8 +261,10 @@ ms-checkout/
 │   │   │   │   └── UsuarioDTO.java           # DTO de usuário
 │   │   │   ├── mapper/
 │   │   │   │   └── UsuarioMapper.java        # MapStruct mapper
-│   │   │   └── producer/
-│   │   │       └── PagamentoEventProducer.java  # Publisher EventBridge
+│   │   │   ├── producer/
+│   │   │   │   └── PagamentoEventProducer.java  # Publisher EventBridge
+│   │   │   └── consumer/
+│   │   │       └── SqsMessageConsumer.java   # SQS Consumer
 │   │   └── resources/
 │   │       ├── application.yaml
 │   │       ├── logback-spring.xml
@@ -315,14 +319,19 @@ package io.resousadev.linuxtips.mscheckout;
 │  │ PagamentoEvent  │                                        │
 │  │    Producer     │                                        │
 │  └────────┬────────┘                                        │
-└───────────┼─────────────────────────────────────────────────┘
-            │
-            ▼
-   ┌──────────────────┐
-   │ Amazon           │
-   │ EventBridge      │
-   │ (checkout-events)│
-   └──────────────────┘
+│           │                                                  │
+│           │         ┌─────────────────┐                     │
+│           │         │ SqsMessage      │                     │
+│           │         │   Consumer      │◄────────────────┐   │
+│           │         └─────────────────┘                 │   │
+└───────────┼─────────────────────────────────────────────┼───┘
+            │                                             │
+            ▼                                             │
+   ┌──────────────────┐      ┌──────────────────┐        │
+   │ Amazon           │      │ Amazon SQS       │        │
+   │ EventBridge      │─────►│ (checkout-events │────────┘
+   │ (status-pedido)  │      │     -queue)      │
+   └──────────────────┘      └──────────────────┘
 ```
 
 **Componentes Implementados:**
@@ -331,11 +340,13 @@ package io.resousadev.linuxtips.mscheckout;
 - **Services**: Lógica de negócio com validação
 - **Repositories**: Persistência com Spring Data JPA
 - **Event Producers**: Publicação de eventos no EventBridge
+- **Event Consumers**: Consumo de mensagens SQS com long polling
 - **Security**: Autenticação e autorização com Spring Security
 
 ### Próximos Passos
 
-- [ ] Implementar consumers SQS para processamento assíncrono
+- [x] ~~Implementar consumers SQS para processamento assíncrono~~
+- [ ] Implementar lógica de negócio no SQS consumer
 - [ ] Adicionar mais eventos de domínio (OrderCreated, OrderCompleted)
 - [ ] Implementar circuit breaker com Resilience4j
 - [ ] Adicionar métricas com Micrometer
@@ -438,6 +449,9 @@ Contribuições são sempre bem-vindas! Para contribuir:
 | `AWS_ACCESS_KEY_ID` | Chave de acesso AWS | - |
 | `AWS_SECRET_ACCESS_KEY` | Chave secreta AWS | - |
 | `AWS_REGION` | Região AWS | us-east-1 |
+| `AWS_ENDPOINT` | Endpoint AWS (LocalStack) | - |
+| `SQS_QUEUE_URL` | URL da fila SQS | - |
+| `SQS_QUEUE_NAME` | Nome da fila SQS | checkout-events-queue |
 
 ## 📝 Licença
 
