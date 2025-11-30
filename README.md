@@ -483,24 +483,6 @@ Após a execução dos testes, os relatórios estarão disponíveis em:
 
 ## 🔧 Git Hooks
 
-O projeto inclui Git hooks para garantir qualidade de código antes dos commits.
-
-### Instalação
-
-```powershell
-# Windows
-.\scripts\install-hooks.ps1
-
-# Unix/Linux/macOS
-./scripts/install-hooks.sh
-```
-
-### Pre-commit Hook
-
-O hook `pre-commit` executa automaticamente:
-- ✅ Checkstyle nos arquivos Java modificados
-- ❌ Bloqueia commit se houver violações
-
 ## 🤝 Contribuindo
 
 Contribuições são sempre bem-vindas! Para contribuir:
