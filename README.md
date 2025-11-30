@@ -303,10 +303,6 @@ ms-checkout/
 │   └── suppressions.xml
 ├── localstack/
 │   └── init-aws.sh                              # AWS resources init script
-├── scripts/
-│   ├── pre-commit                               # Git hook (Checkstyle validation)
-│   ├── install-hooks.ps1                        # Windows hook installer
-│   └── install-hooks.sh                         # Unix hook installer
 ├── docker-compose.yml
 ├── build.gradle
 ├── settings.gradle
