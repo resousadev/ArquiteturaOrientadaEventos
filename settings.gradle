@@ -1,6 +1,6 @@
 rootProject.name = 'ms-checkout'
 
-// Submodules - will be added in subsequent PRs
-// include 'common'
-// include 'ms-checkout-app'
-// include 'manager-file'
+// Submodules
+include 'common'
+// include 'ms-checkout-app'  // Added in feature/ms-checkout-app-module
+// include 'manager-file'     // Added in feature/manager-file-module
