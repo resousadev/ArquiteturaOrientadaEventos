@@ -38,6 +38,7 @@ Este microserviço faz parte do projeto **ArquiteturaOrientadaEventos**, que dem
 
 - ✅ Autenticação e autorização com Spring Security
 - ✅ Publicação de eventos de pagamento no Amazon EventBridge
+- ✅ Consumo de eventos do Amazon SQS com long polling
 - ✅ Gerenciamento de usuários com roles (ADMIN/USER)
 - ✅ Persistência com PostgreSQL e migrações Flyway
 - ✅ Interface web com Thymeleaf (login/home)
@@ -246,10 +247,13 @@ ms-checkout/
 │   │   ├── java/io/resousadev/linuxtips/mscheckout/
 │   │   │   ├── MsCheckoutApplication.java       # Entry point
 │   │   │   ├── config/
-│   │   │   │   ├── AwsConfig.java               # Cliente EventBridge (LocalStack support)
+│   │   │   │   ├── AwsConfig.java               # Clientes AWS (EventBridge, SQS)
 │   │   │   │   ├── LoggingFilter.java           # Correlation ID injection (MDC)
+│   │   │   │   ├── SchedulingConfig.java        # @EnableScheduling support
 │   │   │   │   ├── SecurityConfiguration.java   # Spring Security (form login, BCrypt)
 │   │   │   │   └── WebConfiguration.java        # Configuração MVC
+│   │   │   ├── consumer/
+│   │   │   │   └── SqsMessageConsumer.java      # SQS consumer with long polling
 │   │   │   ├── controller/
 │   │   │   │   ├── CheckoutController.java      # POST /v1/mscheckout/orders
 │   │   │   │   ├── LoginViewController.java     # /login, /home (Thymeleaf views)
@@ -285,6 +289,9 @@ ms-checkout/
 │       │   ├── DockerAvailableCondition.java    # JUnit 5 extension for Docker check
 │       │   ├── MsCheckoutApplicationTests.java
 │       │   ├── config/
+│       │   │   └── LoggingFilterTest.java
+│       │   ├── consumer/
+│       │   │   └── SqsMessageConsumerTest.java
 │       │   ├── controller/
 │       │   │   ├── CheckoutControllerTest.java
 │       │   │   ├── LoginViewControllerTest.java
@@ -376,7 +383,7 @@ package io.resousadev.linuxtips.mscheckout;
 1. **Checkout Request** → Controller recebe requisição de pagamento
 2. **Event Publishing** → EventBridgeProducer publica evento no bus `checkout-events`
 3. **Event Routing** → EventBridge rule roteia para SQS queue
-4. **Message Processing** → Consumer processa mensagens (a implementar)
+4. **Message Processing** → SqsMessageConsumer processa mensagens com long polling
 5. **Error Handling** → Mensagens com falha vão para DLQ
 6. **Observability** → CloudWatch Logs registra todos os eventos
 
@@ -386,12 +393,14 @@ package io.resousadev.linuxtips.mscheckout;
 - ✅ **Services**: Lógica de negócio com validação e BCrypt
 - ✅ **Repositories**: Persistência com Spring Data JPA
 - ✅ **Event Producers**: Publicação de eventos no EventBridge
+- ✅ **Event Consumers**: Consumo de mensagens SQS com long polling
 - ✅ **Security**: Autenticação Form Login + HTTP Basic
 - ✅ **Logging**: Structured JSON logging com Correlation ID
 
 ### Próximos Passos
 
-- [ ] Implementar consumers SQS para processamento assíncrono
+- [x] ~~Implementar consumers SQS para processamento assíncrono~~
+- [ ] Implementar lógica de negócio no SQS consumer
 - [ ] Adicionar mais eventos de domínio (OrderCreated, OrderCompleted)
 - [ ] Implementar circuit breaker com Resilience4j
 - [ ] Adicionar métricas com Micrometer
