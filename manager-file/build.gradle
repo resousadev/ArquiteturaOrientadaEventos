@@ -12,25 +12,13 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-	// Spring Boot Data
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-
-	// Database - PostgreSQL
-	runtimeOnly 'org.postgresql:postgresql'
-
-	// Database - Flyway Migrations
-	implementation 'org.flywaydb:flyway-core'
-	implementation 'org.flywaydb:flyway-database-postgresql'
-
 	// AWS SDK - EventBridge for events
 	implementation 'software.amazon.awssdk:eventbridge'
 	implementation 'software.amazon.awssdk:sqs'
 
 	// AWS SDK - S3 for file storage
 	implementation 'software.amazon.awssdk:s3'
-
-	// Object Mapping - MapStruct
-	implementation 'org.mapstruct:mapstruct'
+	implementation 'software.amazon.awssdk:s3-transfer-manager'
 
 	// Environment Configuration
 	implementation 'me.paulschwarz:spring-dotenv'
@@ -38,13 +26,8 @@ dependencies {
 	// Logging - JSON structured logging
 	implementation 'net.logstash.logback:logstash-logback-encoder'
 
-	// Annotation Processors
-	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
-	annotationProcessor 'org.mapstruct:mapstruct-processor'
-
 	// Testing - Testcontainers
 	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
 	testImplementation 'org.testcontainers:junit-jupiter'
-	testImplementation 'org.testcontainers:postgresql'
 	testImplementation 'org.testcontainers:localstack'
 }
