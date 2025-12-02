@@ -11,6 +11,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import software.amazon.awssdk.services.eventbridge.EventBridgeClient;
+import software.amazon.awssdk.services.sqs.SqsClient;
 
 /**
  * Base class for integration tests that require PostgreSQL via Testcontainers.
@@ -38,5 +39,9 @@ public abstract class AbstractIntegrationTest {
     // Mock do EventBridgeClient para evitar conexão real com AWS durante testes
     @MockitoBean
     protected EventBridgeClient eventBridgeClient;
+
+    // Mock do SqsClient para evitar conexão real com AWS durante testes
+    @MockitoBean
+    protected SqsClient sqsClient;
 
 }

@@ -16,11 +16,11 @@ import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
 
 /**
  * Consumer for processing messages from the SQS checkout-events-queue.
- * 
+ *
  * <p>This consumer uses long polling (20 seconds) for efficient message retrieval.
  * Messages are received from EventBridge via SQS and currently just logged.
  * Business logic will be implemented in a future iteration.</p>
- * 
+ *
  * <p>Message flow:
  * <pre>
  * EventBridge (status-pedido-bus) → SQS (checkout-events-queue) → SqsMessageConsumer
@@ -42,10 +42,10 @@ public class SqsMessageConsumer {
 
     /**
      * Polls the SQS queue for new messages at fixed intervals.
-     * 
+     *
      * <p>Uses long polling (20s) to reduce empty responses and API costs.
      * After successful logging, messages are deleted from the queue.</p>
-     * 
+     *
      * <p>Note: Business logic processing will be added in a future iteration.
      * Currently, messages are only logged and acknowledged (deleted).</p>
      */
@@ -81,7 +81,7 @@ public class SqsMessageConsumer {
 
     /**
      * Processes a single SQS message.
-     * 
+     *
      * <p>Currently logs the message content and deletes it from the queue.
      * TODO: Implement business logic for event processing.</p>
      *
@@ -91,11 +91,11 @@ public class SqsMessageConsumer {
         log.info("=== PROCESSING SQS MESSAGE ===");
         log.info("MessageId: {}", message.messageId());
         log.info("Body: {}", message.body());
-        
+
         if (message.hasAttributes()) {
             log.debug("Attributes: {}", message.attributes());
         }
-        
+
         if (message.hasMessageAttributes()) {
             log.debug("MessageAttributes: {}", message.messageAttributes());
         }

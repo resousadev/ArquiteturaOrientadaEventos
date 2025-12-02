@@ -1,9 +1,6 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.5.7'
+	id 'org.springframework.boot' version '3.5.7' apply false
 	id 'io.spring.dependency-management' version '1.1.7'
-	id 'checkstyle'
-	id 'jacoco'
 }
 
 // =============================================
@@ -11,182 +8,10 @@ plugins {
 // =============================================
 group = 'io.resousadev.linuxtips'
 version = '0.0.1-SNAPSHOT'
-description = 'Multi-module project for microservices'
-
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
-}
-
-repositories {
-	mavenCentral()
-}
-
-configurations {
-	all {
-		exclude group: 'commons-logging', module: 'commons-logging'
-	}
-}
+description = 'Multi-module project for microservices with event-driven architecture'
 
 // =============================================
-// Dependency Management (BOM)
-// =============================================
-dependencyManagement {
-	dependencies {
-		dependency 'software.amazon.awssdk:eventbridge:2.38.5'
-		dependency 'software.amazon.awssdk:sqs:2.38.5'
-		dependency 'software.amazon.awssdk:s3:2.38.5'
-		dependency 'org.mapstruct:mapstruct:1.6.3'
-		dependency 'org.mapstruct:mapstruct-processor:1.6.3'
-		dependency 'me.paulschwarz:spring-dotenv:4.0.0'
-		dependency 'net.logstash.logback:logstash-logback-encoder:8.0'
-	}
-}
-
-// =============================================
-// Dependencies
-// =============================================
-dependencies {
-	// Spring Boot Starters
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-
-	// Environment
-	implementation 'me.paulschwarz:spring-dotenv'
-
-	// AWS SDK v2
-	implementation 'software.amazon.awssdk:eventbridge'
-	implementation 'software.amazon.awssdk:sqs'
-
-	// Database
-	runtimeOnly 'org.postgresql:postgresql'
-	implementation 'org.flywaydb:flyway-core'
-	implementation 'org.flywaydb:flyway-database-postgresql'
-
-	// Lombok - must be before MapStruct
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
-
-	// MapStruct
-	implementation 'org.mapstruct:mapstruct'
-	annotationProcessor 'org.mapstruct:mapstruct-processor'
-	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
-
-	// Logging
-	implementation 'net.logstash.logback:logstash-logback-encoder'
-
-	// Testing
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
-	testImplementation 'org.springframework.security:spring-security-test'
-	testImplementation 'org.testcontainers:testcontainers'
-	testImplementation 'org.testcontainers:junit-jupiter'
-	testImplementation 'org.testcontainers:postgresql'
-	testImplementation 'org.testcontainers:localstack'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
-
-tasks.named('test') {
-	useJUnitPlatform()
-}
-
-// =============================================
-// Checkstyle - Code Style Configuration
-// =============================================
-checkstyle {
-	toolVersion = '10.12.5'
-	configFile = file("config/checkstyle/checkstyle.xml")
-	configDirectory = file("config/checkstyle")
-	ignoreFailures = false
-	showViolations = true
-	maxWarnings = 0
-}
-
-tasks.withType(Checkstyle) {
-	reports {
-		xml.required = true
-		html.required = true
-	}
-}
-
-// =============================================
-// JaCoCo - Code Coverage Configuration
-// =============================================
-jacoco {
-	toolVersion = '0.8.12'
-}
-
-// Classes to exclude from coverage
-def jacocoExcludes = [
-	// Main application classes
-	'**/*Application.class',
-	'**/*Application$*.class',
-	// Configuration classes
-	'**/config/**',
-	// DTOs and Records (no logic)
-	'**/dto/**',
-	// Model/Entities (JPA/Record managed - no logic to test)
-	'**/model/**',
-	// MapStruct generated mappers
-	'**/mappers/*Impl.class',
-	// Exceptions (trivial)
-	'**/exception/**'
-]
-
-tasks.named('test') {
-	finalizedBy jacocoTestReport
-}
-
-jacocoTestReport {
-	dependsOn test
-	
-	afterEvaluate {
-		classDirectories.setFrom(files(classDirectories.files.collect {
-			fileTree(dir: it, excludes: jacocoExcludes)
-		}))
-	}
-	
-	reports {
-		xml.required = true
-		html.required = true
-		csv.required = false
-	}
-}
-
-jacocoTestCoverageVerification {
-	afterEvaluate {
-		classDirectories.setFrom(files(classDirectories.files.collect {
-			fileTree(dir: it, excludes: jacocoExcludes)
-		}))
-	}
-	
-	violationRules {
-		rule {
-			limit {
-				minimum = 0.80
-			}
-		}
-		rule {
-			element = 'CLASS'
-			limit {
-				counter = 'LINE'
-				value = 'COVEREDRATIO'
-				minimum = 0.80
-			}
-		}
-	}
-}
-
-tasks.named('check') {
-	dependsOn jacocoTestCoverageVerification
-}
-
-// =============================================
-// Shared Configuration for Subprojects (when added)
+// Shared Configuration for All Subprojects
 // =============================================
 subprojects {
 	apply plugin: 'java'
@@ -213,6 +38,9 @@ subprojects {
 		}
 	}
 
+	// =============================================
+	// Dependency Management (BOM)
+	// =============================================
 	dependencyManagement {
 		imports {
 			mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
@@ -228,9 +56,15 @@ subprojects {
 		}
 	}
 
+	// =============================================
+	// Common Dependencies for All Modules
+	// =============================================
 	dependencies {
+		// Lombok - Code Generation (must be before MapStruct)
 		compileOnly 'org.projectlombok:lombok'
 		annotationProcessor 'org.projectlombok:lombok'
+
+		// Testing
 		testImplementation 'org.springframework.boot:spring-boot-starter-test'
 		testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	}
@@ -239,6 +73,9 @@ subprojects {
 		useJUnitPlatform()
 	}
 
+	// =============================================
+	// Checkstyle - Code Style Configuration
+	// =============================================
 	checkstyle {
 		toolVersion = '10.12.5'
 		configFile = rootProject.file("config/checkstyle/checkstyle.xml")
@@ -255,17 +92,27 @@ subprojects {
 		}
 	}
 
+	// =============================================
+	// JaCoCo - Code Coverage Configuration
+	// =============================================
 	jacoco {
 		toolVersion = '0.8.12'
 	}
 
-	def subprojectJacocoExcludes = [
+	// Classes to exclude from coverage
+	def jacocoExcludes = [
+		// Main application classes
 		'**/*Application.class',
 		'**/*Application$*.class',
+		// Configuration classes
 		'**/config/**',
+		// DTOs and Records (no logic)
 		'**/dto/**',
+		// Model/Entities (JPA/Record managed - no logic to test)
 		'**/model/**',
+		// MapStruct generated mappers
 		'**/mappers/*Impl.class',
+		// Exceptions (trivial)
 		'**/exception/**'
 	]
 
@@ -278,7 +125,7 @@ subprojects {
 		
 		afterEvaluate {
 			classDirectories.setFrom(files(classDirectories.files.collect {
-				fileTree(dir: it, excludes: subprojectJacocoExcludes)
+				fileTree(dir: it, excludes: jacocoExcludes)
 			}))
 		}
 		
@@ -292,7 +139,7 @@ subprojects {
 	jacocoTestCoverageVerification {
 		afterEvaluate {
 			classDirectories.setFrom(files(classDirectories.files.collect {
-				fileTree(dir: it, excludes: subprojectJacocoExcludes)
+				fileTree(dir: it, excludes: jacocoExcludes)
 			}))
 		}
 		
@@ -316,4 +163,14 @@ subprojects {
 	tasks.named('check') {
 		dependsOn jacocoTestCoverageVerification
 	}
+}
+
+// =============================================
+// Aggregated Tasks (Root Level)
+// =============================================
+tasks.register('checkstyleReport') {
+	group = 'verification'
+	description = 'Runs all checkstyle tasks across all modules'
+	dependsOn subprojects.collect { "${it.path}:checkstyleMain" }
+	dependsOn subprojects.collect { "${it.path}:checkstyleTest" }
 }
