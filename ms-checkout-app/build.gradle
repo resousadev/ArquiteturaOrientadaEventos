@@ -1,0 +1,53 @@
+plugins {
+	id 'org.springframework.boot'
+}
+
+description = 'Checkout microservice application'
+
+dependencies {
+	// Project Dependencies
+	implementation project(':common')
+
+	// Spring Boot Core
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// Spring Boot Security
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+	// Spring Boot Data
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+	// Database - PostgreSQL
+	runtimeOnly 'org.postgresql:postgresql'
+
+	// Database - Flyway Migrations
+	implementation 'org.flywaydb:flyway-core'
+	implementation 'org.flywaydb:flyway-database-postgresql'
+
+	// AWS SDK
+	implementation 'software.amazon.awssdk:eventbridge'
+	implementation 'software.amazon.awssdk:sqs'
+
+	// Object Mapping - MapStruct
+	implementation 'org.mapstruct:mapstruct'
+
+	// Environment Configuration
+	implementation 'me.paulschwarz:spring-dotenv'
+
+	// Logging - JSON structured logging
+	implementation 'net.logstash.logback:logstash-logback-encoder'
+
+	// Annotation Processors
+	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+	annotationProcessor 'org.mapstruct:mapstruct-processor'
+
+	// Testing - Spring Security
+	testImplementation 'org.springframework.security:spring-security-test'
+
+	// Testing - Testcontainers
+	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+	testImplementation 'org.testcontainers:junit-jupiter'
+	testImplementation 'org.testcontainers:postgresql'
+}
