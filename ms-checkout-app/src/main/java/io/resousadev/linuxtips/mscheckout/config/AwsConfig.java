@@ -12,6 +12,8 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.eventbridge.EventBridgeClient;
 import software.amazon.awssdk.services.eventbridge.EventBridgeClientBuilder;
+import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.SqsClientBuilder;
 
 @Configuration
 @Slf4j
@@ -56,6 +58,30 @@ public class AwsConfig {
             builder.endpointOverride(URI.create(awsEndpoint));
         } else {
             log.info("☁️ Usando endpoint AWS real");
+        }
+
+        return builder.build();
+    }
+
+    @Bean
+    public SqsClient sqsClient() {
+        log.info("Configurando SqsClient");
+
+        AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(
+            accessKeyId,
+            secretAccessKey
+        );
+        
+        SqsClientBuilder builder = SqsClient.builder()
+            .region(Region.of(awsRegion))
+            .credentialsProvider(StaticCredentialsProvider.create(awsCredentials));
+
+        // Configure endpoint override for LocalStack
+        if (awsEndpoint != null && !awsEndpoint.isBlank()) {
+            log.info("🔧 SQS usando endpoint customizado (LocalStack): {}", awsEndpoint);
+            builder.endpointOverride(URI.create(awsEndpoint));
+        } else {
+            log.info("☁️ SQS usando endpoint AWS real");
         }
 
         return builder.build();
