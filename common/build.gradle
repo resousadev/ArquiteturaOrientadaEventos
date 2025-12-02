@@ -11,7 +11,4 @@ dependencies {
 	// JSON annotations for serialization (shared events/DTOs)
 	api 'com.fasterxml.jackson.core:jackson-annotations'
 	api 'com.fasterxml.jackson.core:jackson-databind'
-
-	// Spring Web (for REST client/server contracts)
-	implementation 'org.springframework:spring-web'
 }
