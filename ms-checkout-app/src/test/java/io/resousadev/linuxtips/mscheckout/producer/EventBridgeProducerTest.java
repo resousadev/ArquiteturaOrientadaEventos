@@ -19,7 +19,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import io.resousadev.linuxtips.mscheckout.model.Payment;
-import software.amazon.awssdk.http.SdkHttpResponse;
 import software.amazon.awssdk.services.eventbridge.EventBridgeClient;
 import software.amazon.awssdk.services.eventbridge.model.PutEventsRequest;
 import software.amazon.awssdk.services.eventbridge.model.PutEventsResponse;
@@ -35,9 +34,6 @@ class EventBridgeProducerTest {
 
     @Mock
     private EventBridgeClient eventBridgeClient;
-
-    @Mock
-    private SdkHttpResponse sdkHttpResponse;
 
     @InjectMocks
     private EventBridgeProducer eventBridgeProducer;
@@ -65,14 +61,8 @@ class EventBridgeProducerTest {
             .entries(List.of(successEntry))
             .build();
 
-        when(sdkHttpResponse.statusCode()).thenReturn(200);
         when(eventBridgeClient.putEvents(any(PutEventsRequest.class)))
-            .thenAnswer(invocation -> {
-                // Attach SDK HTTP response
-                return response.toBuilder()
-                    .sdkHttpResponse(sdkHttpResponse)
-                    .build();
-            });
+            .thenReturn(response);
 
         // When
         eventBridgeProducer.finishOrder(payment);
@@ -104,11 +94,8 @@ class EventBridgeProducerTest {
             .entries(List.of(failedEntry))
             .build();
 
-        when(sdkHttpResponse.statusCode()).thenReturn(200);
         when(eventBridgeClient.putEvents(any(PutEventsRequest.class)))
-            .thenAnswer(invocation -> response.toBuilder()
-                .sdkHttpResponse(sdkHttpResponse)
-                .build());
+            .thenReturn(response);
 
         // When - should not throw, just log error
         eventBridgeProducer.finishOrder(payment);
@@ -146,11 +133,8 @@ class EventBridgeProducerTest {
             .entries(List.of(successEntry))
             .build();
 
-        when(sdkHttpResponse.statusCode()).thenReturn(200);
         when(eventBridgeClient.putEvents(any(PutEventsRequest.class)))
-            .thenAnswer(invocation -> response.toBuilder()
-                .sdkHttpResponse(sdkHttpResponse)
-                .build());
+            .thenReturn(response);
 
         // When
         eventBridgeProducer.finishOrder(pendingPayment);
@@ -183,11 +167,8 @@ class EventBridgeProducerTest {
             .entries(List.of(successEntry))
             .build();
 
-        when(sdkHttpResponse.statusCode()).thenReturn(200);
         when(eventBridgeClient.putEvents(any(PutEventsRequest.class)))
-            .thenAnswer(invocation -> response.toBuilder()
-                .sdkHttpResponse(sdkHttpResponse)
-                .build());
+            .thenReturn(response);
 
         // When
         eventBridgeProducer.finishOrder(rejectedPayment);

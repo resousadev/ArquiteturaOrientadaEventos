@@ -80,11 +80,13 @@ public class FileServiceImpl implements FileService {
             // Publish event
             eventProducer.publishFileEvent(EventTypes.FILE_UPLOADED, fileMetadata);
 
-            log.info("File uploaded successfully: fileId={}, fileName={}", fileId, file.getOriginalFilename());
+            log.info("File uploaded: fileId={}, fileName={}, size={}, bucket={}", 
+                    fileId, file.getOriginalFilename(), file.getSize(), bucketName);
 
             return fileMetadata;
         } catch (IOException e) {
-            log.error("Failed to upload file: {}", file.getOriginalFilename(), e);
+            log.error("File upload failed: fileName={}, bucket={}, error={}", 
+                    file.getOriginalFilename(), bucketName, e.getMessage(), e);
             throw new RuntimeException("Failed to upload file", e);
         }
     }
@@ -141,7 +143,7 @@ public class FileServiceImpl implements FileService {
         // Publish event
         eventProducer.publishFileEvent(EventTypes.FILE_DELETED, metadata);
 
-        log.info("File deleted successfully: fileId={}", fileId);
+        log.info("File deleted: fileId={}, bucket={}", fileId, bucketName);
     }
 
     @Override

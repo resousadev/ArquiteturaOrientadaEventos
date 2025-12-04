@@ -33,14 +33,10 @@ public class AwsConfig {
 
     @Bean
     public EventBridgeClient eventBridgeClient() {
-        log.info("Configurando EventBridgeClient");
-        log.info("Região AWS: {}", awsRegion);
+        log.info("Initializing EventBridgeClient: region={}", awsRegion);
 
-        // Proteção contra credenciais vazias
-        if (accessKeyId != null && accessKeyId.length() >= 4) {
-            log.info("Access Key ID: {}...", accessKeyId.substring(0, 4));
-        } else {
-            log.warn("Access Key ID não configurada ou inválida");
+        if (accessKeyId == null || accessKeyId.length() < 4) {
+            log.warn("AWS credentials may be invalid: accessKeyId is null or too short");
         }
 
         AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(
@@ -54,10 +50,10 @@ public class AwsConfig {
 
         // Configure endpoint override for LocalStack
         if (awsEndpoint != null && !awsEndpoint.isBlank()) {
-            log.info("🔧 Usando endpoint customizado (LocalStack): {}", awsEndpoint);
+            log.info("EventBridgeClient configured with custom endpoint: endpoint={}", awsEndpoint);
             builder.endpointOverride(URI.create(awsEndpoint));
         } else {
-            log.info("☁️ Usando endpoint AWS real");
+            log.debug("EventBridgeClient configured with AWS production endpoint");
         }
 
         return builder.build();
@@ -65,7 +61,7 @@ public class AwsConfig {
 
     @Bean
     public SqsClient sqsClient() {
-        log.info("Configurando SqsClient");
+        log.info("Initializing SqsClient: region={}", awsRegion);
 
         AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(
             accessKeyId,
@@ -78,10 +74,10 @@ public class AwsConfig {
 
         // Configure endpoint override for LocalStack
         if (awsEndpoint != null && !awsEndpoint.isBlank()) {
-            log.info("🔧 SQS usando endpoint customizado (LocalStack): {}", awsEndpoint);
+            log.info("SqsClient configured with custom endpoint: endpoint={}", awsEndpoint);
             builder.endpointOverride(URI.create(awsEndpoint));
         } else {
-            log.info("☁️ SQS usando endpoint AWS real");
+            log.debug("SqsClient configured with AWS production endpoint");
         }
 
         return builder.build();

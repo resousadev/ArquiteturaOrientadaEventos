@@ -44,8 +44,8 @@ public class FileController {
             @RequestParam("file") final MultipartFile file,
             @RequestParam(value = "metadata", required = false) final Map<String, String> metadata) {
 
-        log.info("Upload request received: fileName={}, size={}", 
-                file.getOriginalFilename(), file.getSize());
+        log.debug("Upload request: fileName={}, size={}, contentType={}", 
+                file.getOriginalFilename(), file.getSize(), file.getContentType());
 
         final FileMetadataDto result = fileService.uploadFile(file, metadata);
 
@@ -63,7 +63,7 @@ public class FileController {
     public ResponseEntity<ApiResponse<FileMetadataDto>> getFileMetadata(
             @PathVariable final String fileId) {
 
-        log.info("Get file metadata request: fileId={}", fileId);
+        log.debug("Get metadata request: fileId={}", fileId);
 
         final FileMetadataDto result = fileService.getFileMetadata(fileId);
 
@@ -78,7 +78,7 @@ public class FileController {
      */
     @DeleteMapping("/{fileId}")
     public ResponseEntity<ApiResponse<Void>> deleteFile(@PathVariable final String fileId) {
-        log.info("Delete file request: fileId={}", fileId);
+        log.debug("Delete request: fileId={}", fileId);
 
         fileService.deleteFile(fileId);
 
@@ -92,7 +92,7 @@ public class FileController {
      */
     @GetMapping
     public ResponseEntity<ApiResponse<List<FileMetadataDto>>> listFiles() {
-        log.info("List files request");
+        log.debug("List files request");
 
         final List<FileMetadataDto> files = fileService.listFiles();
 
@@ -107,7 +107,7 @@ public class FileController {
      */
     @GetMapping("/{fileId}/download-url")
     public ResponseEntity<ApiResponse<String>> getDownloadUrl(@PathVariable final String fileId) {
-        log.info("Generate download URL request: fileId={}", fileId);
+        log.debug("Generate download URL request: fileId={}", fileId);
 
         final String url = fileService.generateDownloadUrl(fileId);
 
