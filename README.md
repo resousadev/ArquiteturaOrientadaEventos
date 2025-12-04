@@ -247,13 +247,10 @@ ms-checkout/
 │   │   ├── java/io/resousadev/linuxtips/mscheckout/
 │   │   │   ├── MsCheckoutApplication.java       # Entry point
 │   │   │   ├── config/
-│   │   │   │   ├── AwsConfig.java               # Clientes AWS (EventBridge, SQS)
+│   │   │   │   ├── AwsConfig.java               # Cliente EventBridge (LocalStack support)
 │   │   │   │   ├── LoggingFilter.java           # Correlation ID injection (MDC)
-│   │   │   │   ├── SchedulingConfig.java        # @EnableScheduling support
 │   │   │   │   ├── SecurityConfiguration.java   # Spring Security (form login, BCrypt)
 │   │   │   │   └── WebConfiguration.java        # Configuração MVC
-│   │   │   ├── consumer/
-│   │   │   │   └── SqsMessageConsumer.java      # SQS consumer with long polling
 │   │   │   ├── controller/
 │   │   │   │   ├── CheckoutController.java      # POST /v1/mscheckout/orders
 │   │   │   │   ├── LoginViewController.java     # /login, /home (Thymeleaf views)
@@ -289,9 +286,6 @@ ms-checkout/
 │       │   ├── DockerAvailableCondition.java    # JUnit 5 extension for Docker check
 │       │   ├── MsCheckoutApplicationTests.java
 │       │   ├── config/
-│       │   │   └── LoggingFilterTest.java
-│       │   ├── consumer/
-│       │   │   └── SqsMessageConsumerTest.java
 │       │   ├── controller/
 │       │   │   ├── CheckoutControllerTest.java
 │       │   │   ├── LoginViewControllerTest.java
@@ -328,54 +322,53 @@ package io.resousadev.linuxtips.mscheckout;
 
 ### Arquitetura Orientada a Eventos com AWS
 
-```
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                                  ms-checkout                                     │
-│                                                                                  │
-│  ┌──────────────┐     ┌──────────────┐     ┌─────────────────┐                  │
-│  │  Controller  │────▶│   Service    │────▶│   Repository    │                  │
-│  │              │     │              │     │                 │                  │
-│  │ • Checkout   │     │ • Usuario    │     │ • Usuario       │                  │
-│  │ • Usuario    │     │              │     │                 │                  │
-│  │ • LoginView  │     └──────────────┘     └────────┬────────┘                  │
-│  └──────┬───────┘                                   │                           │
-│         │                                           ▼                           │
-│         │                                  ┌─────────────────┐                  │
-│         │                                  │   PostgreSQL    │                  │
-│         │                                  │   (checkout)    │                  │
-│         ▼                                  └─────────────────┘                  │
-│  ┌──────────────────┐                                                           │
-│  │ EventBridge      │                                                           │
-│  │ Producer         │                                                           │
-│  └────────┬─────────┘                                                           │
-└───────────┼─────────────────────────────────────────────────────────────────────┘
-            │
-            ▼
-   ┌────────────────────┐         ┌──────────────────────────────────────────────┐
-   │  Amazon            │         │              EventBridge Rule                 │
-   │  EventBridge       │────────▶│         (checkout-to-sqs-rule)               │
-   │  (checkout-events) │         │                                              │
-   └────────────────────┘         └──────────────────────┬───────────────────────┘
-                                                         │
-                                                         ▼
-                                  ┌──────────────────────────────────────────────┐
-                                  │              Amazon SQS                       │
-                                  │         (checkout-events-queue)              │
-                                  │                    │                          │
-                                  │     On Failure     ▼                          │
-                                  │            ┌───────────────┐                  │
-                                  │            │  Dead Letter  │                  │
-                                  │            │    Queue      │                  │
-                                  │            │ (checkout-    │                  │
-                                  │            │  events-dlq)  │                  │
-                                  │            └───────────────┘                  │
-                                  └──────────────────────────────────────────────┘
-                                                         │
-                                                         ▼
-                                  ┌──────────────────────────────────────────────┐
-                                  │              CloudWatch Logs                  │
-                                  │         (/ms-checkout/events)                │
-                                  └──────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph msCheckout["ms-checkout (Spring Boot)"]
+        controller["Controllers<br/>• CheckoutController<br/>• UsuarioController<br/>• LoginViewController"]
+        service["Services<br/>• UsuarioService"]
+        repository["Repositories<br/>• UsuarioRepository"]
+        producer["EventBridge<br/>Producer"]
+        consumer["SQS Message<br/>Consumer"]
+        
+        controller --> service
+        service --> repository
+        controller --> producer
+    end
+    
+    db[("PostgreSQL<br/>checkout_db<br/>(schema: checkout)")]
+    repository --> db
+    
+    subgraph aws["AWS Services (LocalStack)"]
+        eventbridge["Amazon EventBridge<br/>Bus: checkout-events"]
+        rule["EventBridge Rule<br/>checkout-to-sqs-rule"]
+        sqs["Amazon SQS<br/>checkout-events-queue"]
+        dlq["Dead Letter Queue<br/>checkout-events-dlq"]
+        cloudwatch["CloudWatch Logs<br/>/ms-checkout/events"]
+        
+        eventbridge --> rule
+        rule --> sqs
+        sqs -->|On Failure| dlq
+        sqs --> cloudwatch
+    end
+    
+    producer -->|Publish Event| eventbridge
+    sqs -->|Long Polling| consumer
+    consumer -->|Process & Log| cloudwatch
+    
+    style msCheckout fill:#6db33f,stroke:#fff,color:#fff
+    style aws fill:#ff9900,stroke:#232f3e,color:#232f3e
+    style db fill:#336791,stroke:#fff,color:#fff
+    style controller fill:#5d9db9,stroke:#fff,color:#fff
+    style service fill:#5d9db9,stroke:#fff,color:#fff
+    style repository fill:#5d9db9,stroke:#fff,color:#fff
+    style producer fill:#5d9db9,stroke:#fff,color:#fff
+    style consumer fill:#5d9db9,stroke:#fff,color:#fff
+    style eventbridge fill:#ff4f8b,stroke:#fff,color:#fff
+    style rule fill:#ff4f8b,stroke:#fff,color:#fff
+    style sqs fill:#ff9900,stroke:#fff,color:#232f3e
+    style dlq fill:#d13212,stroke:#fff,color:#fff
+    style cloudwatch fill:#ff9900,stroke:#fff,color:#232f3e
 ```
 
 ### Fluxo de Eventos
@@ -383,7 +376,7 @@ package io.resousadev.linuxtips.mscheckout;
 1. **Checkout Request** → Controller recebe requisição de pagamento
 2. **Event Publishing** → EventBridgeProducer publica evento no bus `checkout-events`
 3. **Event Routing** → EventBridge rule roteia para SQS queue
-4. **Message Processing** → SqsMessageConsumer processa mensagens com long polling
+4. **Message Processing** → Consumer processa mensagens (a implementar)
 5. **Error Handling** → Mensagens com falha vão para DLQ
 6. **Observability** → CloudWatch Logs registra todos os eventos
 
@@ -393,7 +386,6 @@ package io.resousadev.linuxtips.mscheckout;
 - ✅ **Services**: Lógica de negócio com validação e BCrypt
 - ✅ **Repositories**: Persistência com Spring Data JPA
 - ✅ **Event Producers**: Publicação de eventos no EventBridge
-- ✅ **Event Consumers**: Consumo de mensagens SQS com long polling
 - ✅ **Security**: Autenticação Form Login + HTTP Basic
 - ✅ **Logging**: Structured JSON logging com Correlation ID
 
@@ -410,12 +402,19 @@ package io.resousadev.linuxtips.mscheckout;
 ### Configuração
 
 O projeto utiliza PostgreSQL 15 com Flyway para migrações e LocalStack para emular serviços AWS.
+O projeto utiliza PostgreSQL 15 com Flyway para migrações e LocalStack para emular serviços AWS.
 
+**Docker Compose (PostgreSQL + LocalStack):**
 **Docker Compose (PostgreSQL + LocalStack):**
 ```powershell
 # Iniciar infraestrutura completa
+# Iniciar infraestrutura completa
 docker-compose up -d
 
+# Verificar status
+docker-compose ps
+
+# Parar serviços
 # Verificar status
 docker-compose ps
 
@@ -425,6 +424,15 @@ docker-compose down
 # Parar e remover volumes
 docker-compose down -v
 ```
+
+**Recursos AWS criados pelo LocalStack:**
+| Recurso | Nome | Descrição |
+|---------|------|-----------|
+| EventBridge Bus | `checkout-events` | Barramento de eventos |
+| SQS Queue | `checkout-events-queue` | Fila de processamento |
+| SQS DLQ | `checkout-events-dlq` | Dead Letter Queue |
+| EventBridge Rule | `checkout-to-sqs-rule` | Roteamento de eventos |
+| CloudWatch Logs | `/ms-checkout/events` | Log de eventos |
 
 **Recursos AWS criados pelo LocalStack:**
 | Recurso | Nome | Descrição |
