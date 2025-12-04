@@ -322,99 +322,53 @@ package io.resousadev.linuxtips.mscheckout;
 
 ### Arquitetura Orientada a Eventos com AWS
 
-```
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                                  ms-checkout                                     │
-│                                                                                  │
-│  ┌──────────────┐     ┌──────────────┐     ┌─────────────────┐                  │
-│  │  Controller  │────▶│   Service    │────▶│   Repository    │                  │
-│  │              │     │              │     │                 │                  │
-│  │ • Checkout   │     │ • Usuario    │     │ • Usuario       │                  │
-│  │ • Usuario    │     │              │     │                 │                  │
-│  │ • LoginView  │     └──────────────┘     └────────┬────────┘                  │
-│  └──────┬───────┘                                   │                           │
-│         │                                           ▼                           │
-│         │                                  ┌─────────────────┐                  │
-│         │                                  │   PostgreSQL    │                  │
-│         │                                  │   (checkout)    │                  │
-│         ▼                                  └─────────────────┘                  │
-│  ┌──────────────────┐                                                           │
-│  │ EventBridge      │                                                           │
-│  │ Producer         │                                                           │
-│  └────────┬─────────┘                                                           │
-└───────────┼─────────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                                  ms-checkout                                     │
-│                                                                                  │
-│  ┌──────────────┐     ┌──────────────┐     ┌─────────────────┐                  │
-│  │  Controller  │────▶│   Service    │────▶│   Repository    │                  │
-│  │              │     │              │     │                 │                  │
-│  │ • Checkout   │     │ • Usuario    │     │ • Usuario       │                  │
-│  │ • Usuario    │     │              │     │                 │                  │
-│  │ • LoginView  │     └──────────────┘     └────────┬────────┘                  │
-│  └──────┬───────┘                                   │                           │
-│         │                                           ▼                           │
-│         │                                  ┌─────────────────┐                  │
-│         │                                  │   PostgreSQL    │                  │
-│         │                                  │   (checkout)    │                  │
-│         ▼                                  └─────────────────┘                  │
-│  ┌──────────────────┐                                                           │
-│  │ EventBridge      │                                                           │
-│  │ Producer         │                                                           │
-│  └────────┬─────────┘                                                           │
-└───────────┼─────────────────────────────────────────────────────────────────────┘
-            │
-            ▼
-   ┌────────────────────┐         ┌──────────────────────────────────────────────┐
-   │  Amazon            │         │              EventBridge Rule                 │
-   │  EventBridge       │────────▶│         (checkout-to-sqs-rule)               │
-   │  (checkout-events) │         │                                              │
-   └────────────────────┘         └──────────────────────┬───────────────────────┘
-                                                         │
-                                                         ▼
-                                  ┌──────────────────────────────────────────────┐
-                                  │              Amazon SQS                       │
-                                  │         (checkout-events-queue)              │
-                                  │                    │                          │
-                                  │     On Failure     ▼                          │
-                                  │            ┌───────────────┐                  │
-                                  │            │  Dead Letter  │                  │
-                                  │            │    Queue      │                  │
-                                  │            │ (checkout-    │                  │
-                                  │            │  events-dlq)  │                  │
-                                  │            └───────────────┘                  │
-                                  └──────────────────────────────────────────────┘
-                                                         │
-                                                         ▼
-                                  ┌──────────────────────────────────────────────┐
-                                  │              CloudWatch Logs                  │
-                                  │         (/ms-checkout/events)                │
-                                  └──────────────────────────────────────────────┘
-   ┌────────────────────┐         ┌──────────────────────────────────────────────┐
-   │  Amazon            │         │              EventBridge Rule                 │
-   │  EventBridge       │────────▶│         (checkout-to-sqs-rule)               │
-   │  (checkout-events) │         │                                              │
-   └────────────────────┘         └──────────────────────┬───────────────────────┘
-                                                         │
-                                                         ▼
-                                  ┌──────────────────────────────────────────────┐
-                                  │              Amazon SQS                       │
-                                  │         (checkout-events-queue)              │
-                                  │                    │                          │
-                                  │     On Failure     ▼                          │
-                                  │            ┌───────────────┐                  │
-                                  │            │  Dead Letter  │                  │
-                                  │            │    Queue      │                  │
-                                  │            │ (checkout-    │                  │
-                                  │            │  events-dlq)  │                  │
-                                  │            └───────────────┘                  │
-                                  └──────────────────────────────────────────────┘
-                                                         │
-                                                         ▼
-                                  ┌──────────────────────────────────────────────┐
-                                  │              CloudWatch Logs                  │
-                                  │         (/ms-checkout/events)                │
-                                  └──────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph msCheckout["ms-checkout (Spring Boot)"]
+        controller["Controllers<br/>• CheckoutController<br/>• UsuarioController<br/>• LoginViewController"]
+        service["Services<br/>• UsuarioService"]
+        repository["Repositories<br/>• UsuarioRepository"]
+        producer["EventBridge<br/>Producer"]
+        consumer["SQS Message<br/>Consumer"]
+        
+        controller --> service
+        service --> repository
+        controller --> producer
+    end
+    
+    db[("PostgreSQL<br/>checkout_db<br/>(schema: checkout)")]
+    repository --> db
+    
+    subgraph aws["AWS Services (LocalStack)"]
+        eventbridge["Amazon EventBridge<br/>Bus: checkout-events"]
+        rule["EventBridge Rule<br/>checkout-to-sqs-rule"]
+        sqs["Amazon SQS<br/>checkout-events-queue"]
+        dlq["Dead Letter Queue<br/>checkout-events-dlq"]
+        cloudwatch["CloudWatch Logs<br/>/ms-checkout/events"]
+        
+        eventbridge --> rule
+        rule --> sqs
+        sqs -->|On Failure| dlq
+        sqs --> cloudwatch
+    end
+    
+    producer -->|Publish Event| eventbridge
+    sqs -->|Long Polling| consumer
+    consumer -->|Process & Log| cloudwatch
+    
+    style msCheckout fill:#6db33f,stroke:#fff,color:#fff
+    style aws fill:#ff9900,stroke:#232f3e,color:#232f3e
+    style db fill:#336791,stroke:#fff,color:#fff
+    style controller fill:#5d9db9,stroke:#fff,color:#fff
+    style service fill:#5d9db9,stroke:#fff,color:#fff
+    style repository fill:#5d9db9,stroke:#fff,color:#fff
+    style producer fill:#5d9db9,stroke:#fff,color:#fff
+    style consumer fill:#5d9db9,stroke:#fff,color:#fff
+    style eventbridge fill:#ff4f8b,stroke:#fff,color:#fff
+    style rule fill:#ff4f8b,stroke:#fff,color:#fff
+    style sqs fill:#ff9900,stroke:#fff,color:#232f3e
+    style dlq fill:#d13212,stroke:#fff,color:#fff
+    style cloudwatch fill:#ff9900,stroke:#fff,color:#232f3e
 ```
 
 ### Fluxo de Eventos
