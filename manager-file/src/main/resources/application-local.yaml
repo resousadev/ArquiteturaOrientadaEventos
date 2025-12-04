@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: manager-file
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/managerfile_db
+    username: postgres
+    password: postgres
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+server:
+  port: 8081
+
+# LocalStack AWS Configuration
+aws:
+  region: us-east-1
+  accessKeyId: test
+  secretAccessKey: test
+  endpoint: http://localhost:4566
+  
+  s3:
+    bucket: manager-file-bucket
+    presign-duration: 60
+  
+  eventbridge:
+    bus-name: checkout-event-bus
+  
+  sqs:
+    enabled: true
+    file-events-queue-url: http://localhost:4566/000000000000/file-events-queue
+    poll-interval: 5000
+
+logging:
+  level:
+    root: INFO
+    io.resousadev.linuxtips.managerfile: DEBUG

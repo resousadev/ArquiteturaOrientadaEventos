@@ -38,6 +38,7 @@ Este microserviço faz parte do projeto **ArquiteturaOrientadaEventos**, que dem
 
 - ✅ Autenticação e autorização com Spring Security
 - ✅ Publicação de eventos de pagamento no Amazon EventBridge
+- ✅ Consumo de eventos do Amazon SQS com long polling
 - ✅ Gerenciamento de usuários com roles (ADMIN/USER)
 - ✅ Persistência com PostgreSQL e migrações Flyway
 - ✅ Interface web com Thymeleaf (login/home)
@@ -342,8 +343,53 @@ package io.resousadev.linuxtips.mscheckout;
 │  │ Producer         │                                                           │
 │  └────────┬─────────┘                                                           │
 └───────────┼─────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                                  ms-checkout                                     │
+│                                                                                  │
+│  ┌──────────────┐     ┌──────────────┐     ┌─────────────────┐                  │
+│  │  Controller  │────▶│   Service    │────▶│   Repository    │                  │
+│  │              │     │              │     │                 │                  │
+│  │ • Checkout   │     │ • Usuario    │     │ • Usuario       │                  │
+│  │ • Usuario    │     │              │     │                 │                  │
+│  │ • LoginView  │     └──────────────┘     └────────┬────────┘                  │
+│  └──────┬───────┘                                   │                           │
+│         │                                           ▼                           │
+│         │                                  ┌─────────────────┐                  │
+│         │                                  │   PostgreSQL    │                  │
+│         │                                  │   (checkout)    │                  │
+│         ▼                                  └─────────────────┘                  │
+│  ┌──────────────────┐                                                           │
+│  │ EventBridge      │                                                           │
+│  │ Producer         │                                                           │
+│  └────────┬─────────┘                                                           │
+└───────────┼─────────────────────────────────────────────────────────────────────┘
             │
             ▼
+   ┌────────────────────┐         ┌──────────────────────────────────────────────┐
+   │  Amazon            │         │              EventBridge Rule                 │
+   │  EventBridge       │────────▶│         (checkout-to-sqs-rule)               │
+   │  (checkout-events) │         │                                              │
+   └────────────────────┘         └──────────────────────┬───────────────────────┘
+                                                         │
+                                                         ▼
+                                  ┌──────────────────────────────────────────────┐
+                                  │              Amazon SQS                       │
+                                  │         (checkout-events-queue)              │
+                                  │                    │                          │
+                                  │     On Failure     ▼                          │
+                                  │            ┌───────────────┐                  │
+                                  │            │  Dead Letter  │                  │
+                                  │            │    Queue      │                  │
+                                  │            │ (checkout-    │                  │
+                                  │            │  events-dlq)  │                  │
+                                  │            └───────────────┘                  │
+                                  └──────────────────────────────────────────────┘
+                                                         │
+                                                         ▼
+                                  ┌──────────────────────────────────────────────┐
+                                  │              CloudWatch Logs                  │
+                                  │         (/ms-checkout/events)                │
+                                  └──────────────────────────────────────────────┘
    ┌────────────────────┐         ┌──────────────────────────────────────────────┐
    │  Amazon            │         │              EventBridge Rule                 │
    │  EventBridge       │────────▶│         (checkout-to-sqs-rule)               │
@@ -391,7 +437,8 @@ package io.resousadev.linuxtips.mscheckout;
 
 ### Próximos Passos
 
-- [ ] Implementar consumers SQS para processamento assíncrono
+- [x] ~~Implementar consumers SQS para processamento assíncrono~~
+- [ ] Implementar lógica de negócio no SQS consumer
 - [ ] Adicionar mais eventos de domínio (OrderCreated, OrderCompleted)
 - [ ] Implementar circuit breaker com Resilience4j
 - [ ] Adicionar métricas com Micrometer
@@ -401,12 +448,19 @@ package io.resousadev.linuxtips.mscheckout;
 ### Configuração
 
 O projeto utiliza PostgreSQL 15 com Flyway para migrações e LocalStack para emular serviços AWS.
+O projeto utiliza PostgreSQL 15 com Flyway para migrações e LocalStack para emular serviços AWS.
 
+**Docker Compose (PostgreSQL + LocalStack):**
 **Docker Compose (PostgreSQL + LocalStack):**
 ```powershell
 # Iniciar infraestrutura completa
+# Iniciar infraestrutura completa
 docker-compose up -d
 
+# Verificar status
+docker-compose ps
+
+# Parar serviços
 # Verificar status
 docker-compose ps
 
@@ -416,6 +470,15 @@ docker-compose down
 # Parar e remover volumes
 docker-compose down -v
 ```
+
+**Recursos AWS criados pelo LocalStack:**
+| Recurso | Nome | Descrição |
+|---------|------|-----------|
+| EventBridge Bus | `checkout-events` | Barramento de eventos |
+| SQS Queue | `checkout-events-queue` | Fila de processamento |
+| SQS DLQ | `checkout-events-dlq` | Dead Letter Queue |
+| EventBridge Rule | `checkout-to-sqs-rule` | Roteamento de eventos |
+| CloudWatch Logs | `/ms-checkout/events` | Log de eventos |
 
 **Recursos AWS criados pelo LocalStack:**
 | Recurso | Nome | Descrição |

@@ -1,1 +1,6 @@
 rootProject.name = 'ms-checkout'
+
+// Submodules
+include 'common'
+include 'ms-checkout-app'
+include 'manager-file'

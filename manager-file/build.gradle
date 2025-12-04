@@ -1,0 +1,33 @@
+plugins {
+	id 'org.springframework.boot'
+}
+
+description = 'File management microservice - independent module for file operations'
+
+dependencies {
+	// Project Dependencies
+	implementation project(':common')
+
+	// Spring Boot Core
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// AWS SDK - EventBridge for events
+	implementation 'software.amazon.awssdk:eventbridge'
+	implementation 'software.amazon.awssdk:sqs'
+
+	// AWS SDK - S3 for file storage
+	implementation 'software.amazon.awssdk:s3'
+	implementation 'software.amazon.awssdk:s3-transfer-manager'
+
+	// Environment Configuration
+	implementation 'me.paulschwarz:spring-dotenv'
+
+	// Logging - JSON structured logging
+	implementation 'net.logstash.logback:logstash-logback-encoder'
+
+	// Testing - Testcontainers
+	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+	testImplementation 'org.testcontainers:junit-jupiter'
+	testImplementation 'org.testcontainers:localstack'
+}
