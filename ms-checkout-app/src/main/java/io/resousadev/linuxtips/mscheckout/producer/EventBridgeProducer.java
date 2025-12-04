@@ -17,22 +17,22 @@ public class EventBridgeProducer {
 
     private final EventBridgeClient eventBridgeClient;
 
+    private static final String EVENT_BUS_NAME = "status-pedido-bus";
+
     /**
      * Finaliza um pedido enviando evento para o AWS EventBridge.
      *
      * @param payment dados do pagamento a ser publicado como evento
      */
     public void finishOrder(final Payment payment) {
-        log.info("=== ENVIANDO EVENTO PARA EVENTBRIDGE ===");
-        log.debug("Payment: {}", payment);
-        log.debug("Event Bus: status-pedido-bus");
-        log.debug("Region: us-east-1");
+        log.debug("Publishing event to EventBridge: eventBus={}, source={}, detailType={}",
+                EVENT_BUS_NAME, payment.origem(), payment.status());
 
         PutEventsRequestEntry eventRequest = PutEventsRequestEntry.builder()
             .source(payment.origem())
             .detailType(payment.status())
             .detail("{ \"valor\": \"" + payment.valor() + "\" }")
-            .eventBusName("status-pedido-bus")
+            .eventBusName(EVENT_BUS_NAME)
             .build();
 
         try {
@@ -40,33 +40,20 @@ public class EventBridgeProducer {
                     .entries(eventRequest)
                     .build();
 
-            log.debug("Request construído: {}", request);
-
             PutEventsResponse response = eventBridgeClient.putEvents(request);
-
-            log.debug("Response HTTP Status: {}", response.sdkHttpResponse().statusCode());
-            log.debug("Failed Entry Count: {}", response.failedEntryCount());
-            log.debug("Entries: {}", response.entries());
 
             if (response.failedEntryCount() > 0) {
                 var failedEntry = response.entries().get(0);
-                log.error("❌ FALHA AO ENVIAR EVENTO!");
-                log.error("Status: {}", payment.status());
-                log.error("ErrorCode: {}", failedEntry.errorCode());
-                log.error("ErrorMessage: {}", failedEntry.errorMessage());
+                log.error("EventBridge publish failed: eventBus={}, detailType={}, errorCode={}, errorMessage={}",
+                        EVENT_BUS_NAME, payment.status(), failedEntry.errorCode(), failedEntry.errorMessage());
             } else {
-                log.info("✅ EVENTO ENVIADO COM SUCESSO!");
-                log.info("Status: {}", payment.status());
-                log.info("EventId: {}", response.entries().get(0).eventId());
-                log.info("HTTP Status: {}", response.sdkHttpResponse().statusCode());
+                log.info("Event published to EventBridge: eventId={}, eventBus={}, detailType={}",
+                        response.entries().get(0).eventId(), EVENT_BUS_NAME, payment.status());
             }
         } catch (Exception e) {
-            log.error("❌ EXCEÇÃO ao enviar evento para EventBridge", e);
-            log.error("Mensagem: {}", e.getMessage());
-            log.error("Causa: {}", e.getCause());
+            log.error("EventBridge publish exception: eventBus={}, detailType={}, error={}",
+                    EVENT_BUS_NAME, payment.status(), e.getMessage(), e);
             throw e;
         }
-
-        log.info("=== FIM DO ENVIO ===");
     }
 }

@@ -63,18 +63,18 @@ public class FileEventConsumer {
                 processMessage(message);
             }
         } catch (Exception e) {
-            log.error("Error polling SQS messages", e);
+            log.error("SQS polling failed: queueUrl={}, error={}", queueUrl, e.getMessage(), e);
         }
     }
 
     private void processMessage(final Message message) {
         try {
-            log.info("Processing message: messageId={}", message.messageId());
+            log.debug("Processing SQS message: messageId={}", message.messageId());
 
             // Parse the event
             final BaseEvent<?> event = objectMapper.readValue(message.body(), BaseEvent.class);
 
-            log.info("Received event: eventType={}, eventId={}, source={}", 
+            log.info("Event received: eventType={}, eventId={}, source={}", 
                     event.getEventType(), event.getEventId(), event.getSource());
 
             // Process based on event type
@@ -83,7 +83,7 @@ public class FileEventConsumer {
             // Delete message after successful processing
             deleteMessage(message);
         } catch (Exception e) {
-            log.error("Failed to process message: messageId={}", message.messageId(), e);
+            log.error("Message processing failed: messageId={}, error={}", message.messageId(), e.getMessage(), e);
         }
     }
 
@@ -92,17 +92,18 @@ public class FileEventConsumer {
         switch (event.getEventType()) {
             case EventTypes.CHECKOUT_COMPLETED -> handleCheckoutCompleted(event);
             case EventTypes.USER_CREATED -> handleUserCreated(event);
-            default -> log.warn("Unknown event type: {}", event.getEventType());
+            default -> log.warn("Unknown event type received: eventType={}, eventId={}", 
+                    event.getEventType(), event.getEventId());
         }
     }
 
     private void handleCheckoutCompleted(final BaseEvent<?> event) {
-        log.info("Handling checkout completed event: eventId={}", event.getEventId());
+        log.info("Handling checkout completed: eventId={}", event.getEventId());
         // Implement checkout completed logic - e.g., generate invoice PDF
     }
 
     private void handleUserCreated(final BaseEvent<?> event) {
-        log.info("Handling user created event: eventId={}", event.getEventId());
+        log.info("Handling user created: eventId={}", event.getEventId());
         // Implement user created logic - e.g., create user folder
     }
 
@@ -113,6 +114,6 @@ public class FileEventConsumer {
                 .build();
 
         sqsClient.deleteMessage(deleteRequest);
-        log.debug("Message deleted: messageId={}", message.messageId());
+        log.debug("SQS message deleted: messageId={}", message.messageId());
     }
 }

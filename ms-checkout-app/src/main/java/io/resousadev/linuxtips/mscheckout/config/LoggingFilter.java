@@ -63,7 +63,7 @@ public class LoggingFilter implements Filter {
             MDC.put(REQUEST_URI_MDC_KEY, httpRequest.getRequestURI());
             MDC.put(REQUEST_METHOD_MDC_KEY, httpRequest.getMethod());
             
-            log.debug("Iniciando requisição - Method: {}, URI: {}, CorrelationId: {}", 
+            log.trace("Request started: method={}, uri={}, correlationId={}", 
                     httpRequest.getMethod(), 
                     httpRequest.getRequestURI(), 
                     correlationId);
@@ -73,7 +73,7 @@ public class LoggingFilter implements Filter {
             
         } finally {
             // CRÍTICO: Limpar o MDC para evitar memory leaks em thread pools
-            log.debug("Finalizando requisição - CorrelationId: {}", MDC.get(CORRELATION_ID_MDC_KEY));
+            log.trace("Request completed: correlationId={}", MDC.get(CORRELATION_ID_MDC_KEY));
             MDC.clear();
         }
     }

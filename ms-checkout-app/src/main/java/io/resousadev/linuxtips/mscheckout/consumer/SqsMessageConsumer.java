@@ -51,7 +51,7 @@ public class SqsMessageConsumer {
      */
     @Scheduled(fixedDelay = 1000)
     public void pollMessages() {
-        log.debug("Polling SQS queue for messages: {}", queueUrl);
+        log.trace("Polling SQS queue: queueUrl={}", queueUrl);
 
         try {
             ReceiveMessageRequest receiveRequest = ReceiveMessageRequest.builder()
@@ -64,18 +64,18 @@ public class SqsMessageConsumer {
             List<Message> messages = response.messages();
 
             if (messages.isEmpty()) {
-                log.debug("No messages received from SQS queue");
+                log.trace("No messages received from SQS queue");
                 return;
             }
 
-            log.info("📥 Received {} message(s) from SQS queue", messages.size());
+            log.debug("SQS messages received: count={}", messages.size());
 
             for (Message message : messages) {
                 processMessage(message);
             }
 
         } catch (Exception e) {
-            log.error("❌ Error polling SQS queue: {}", e.getMessage(), e);
+            log.error("SQS polling failed: queueUrl={}, error={}", queueUrl, e.getMessage(), e);
         }
     }
 
@@ -88,23 +88,25 @@ public class SqsMessageConsumer {
      * @param message the SQS message to process
      */
     private void processMessage(final Message message) {
-        log.info("=== PROCESSING SQS MESSAGE ===");
-        log.info("MessageId: {}", message.messageId());
-        log.info("Body: {}", message.body());
+        log.info("Processing SQS message: messageId={}", message.messageId());
+        log.debug("SQS message body: messageId={}, body={}", message.messageId(), message.body());
 
-        if (message.hasAttributes()) {
-            log.debug("Attributes: {}", message.attributes());
-        }
-
-        if (message.hasMessageAttributes()) {
-            log.debug("MessageAttributes: {}", message.messageAttributes());
+        if (log.isTraceEnabled()) {
+            if (message.hasAttributes()) {
+                log.trace("SQS message attributes: messageId={}, attributes={}", 
+                        message.messageId(), message.attributes());
+            }
+            if (message.hasMessageAttributes()) {
+                log.trace("SQS message custom attributes: messageId={}, messageAttributes={}", 
+                        message.messageId(), message.messageAttributes());
+            }
         }
 
         // TODO: Add business logic here
         // Example: Parse EventBridge envelope, extract detail, process checkout event
 
         deleteMessage(message);
-        log.info("=== MESSAGE PROCESSED ===");
+        log.info("SQS message processed: messageId={}", message.messageId());
     }
 
     /**
@@ -120,10 +122,11 @@ public class SqsMessageConsumer {
                 .build();
 
             sqsClient.deleteMessage(deleteRequest);
-            log.debug("✅ Message deleted from queue: {}", message.messageId());
+            log.debug("SQS message deleted: messageId={}", message.messageId());
 
         } catch (Exception e) {
-            log.error("❌ Failed to delete message {}: {}", message.messageId(), e.getMessage(), e);
+            log.error("SQS message deletion failed: messageId={}, error={}", 
+                    message.messageId(), e.getMessage(), e);
         }
     }
 }

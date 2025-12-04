@@ -58,15 +58,15 @@ public class FileEventProducer {
             final var response = eventBridgeClient.putEvents(request);
 
             if (response.failedEntryCount() > 0) {
-                log.error("Failed to publish event: eventType={}, failedCount={}", 
-                        eventType, response.failedEntryCount());
+                log.error("EventBridge publish failed: eventType={}, eventBus={}, failedCount={}", 
+                        eventType, eventBusName, response.failedEntryCount());
                 throw new EventPublishingException(eventType, null);
             }
 
-            log.info("Event published successfully: eventType={}, eventId={}", 
-                    eventType, event.getEventId());
+            log.info("Event published to EventBridge: eventType={}, eventId={}, eventBus={}", 
+                    eventType, event.getEventId(), eventBusName);
         } catch (JsonProcessingException e) {
-            log.error("Failed to serialize event: eventType={}", eventType, e);
+            log.error("Event serialization failed: eventType={}, error={}", eventType, e.getMessage(), e);
             throw new EventPublishingException(eventType, e);
         }
     }
