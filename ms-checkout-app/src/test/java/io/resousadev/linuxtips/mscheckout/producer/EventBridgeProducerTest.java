@@ -180,4 +180,34 @@ class EventBridgeProducerTest {
         assertThat(entry.detailType()).isEqualTo("REJECTED");
         assertThat(entry.detail()).contains("5000.00");
     }
+
+    @Test
+    @DisplayName("Should publish payment processed event successfully")
+    void shouldPublishPaymentProcessedEventSuccessfully() {
+        PutEventsResultEntry successEntry = PutEventsResultEntry.builder()
+            .eventId("event-payment-001")
+            .build();
+
+        PutEventsResponse response = PutEventsResponse.builder()
+            .failedEntryCount(0)
+            .entries(List.of(successEntry))
+            .build();
+
+        when(eventBridgeClient.putEvents(any(PutEventsRequest.class)))
+            .thenReturn(response);
+
+        eventBridgeProducer.publishPaymentProcessedEvent(
+                payment,
+                "TX-123",
+                io.resousadev.linuxtips.mscheckout.strategy.enumeration.PaymentTypeEnum.CREDIT_CARD
+        );
+
+        verify(eventBridgeClient).putEvents(requestCaptor.capture());
+
+        var entry = requestCaptor.getValue().entries().get(0);
+        assertThat(entry.source()).isEqualTo("checkout-service");
+        assertThat(entry.detailType()).isEqualTo("PAYMENT_PROCESSED");
+        assertThat(entry.detail()).contains("TX-123");
+        assertThat(entry.detail()).contains("CREDIT_CARD");
+    }
 }

@@ -2,6 +2,7 @@ package io.resousadev.linuxtips.mscheckout.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -19,6 +20,7 @@ import io.resousadev.linuxtips.mscheckout.config.SecurityConfiguration;
 import io.resousadev.linuxtips.mscheckout.model.Payment;
 import io.resousadev.linuxtips.mscheckout.producer.EventBridgeProducer;
 import io.resousadev.linuxtips.mscheckout.service.UsuarioService;
+import io.resousadev.linuxtips.mscheckout.usecase.ProcessPaymentUseCase;
 
 /**
  * Web layer tests for {@link CheckoutController}.
@@ -37,6 +39,9 @@ class CheckoutControllerTest {
 
     @MockitoBean
     private UsuarioService usuarioService;
+
+    @MockitoBean
+    private ProcessPaymentUseCase processPaymentUseCase;
 
     @Test
     @DisplayName("Should return 401 when not authenticated")
@@ -105,5 +110,35 @@ class CheckoutControllerTest {
             .andExpect(status().isOk());
 
         verify(eventBridgeProducer).finishOrder(any(Payment.class));
+    }
+
+    @Test
+    @WithMockUser
+    @DisplayName("Should process payment successfully")
+    void shouldProcessPaymentSuccessfully() throws Exception {
+        final io.resousadev.linuxtips.mscheckout.dto.PaymentResponse paymentResponse =
+                new io.resousadev.linuxtips.mscheckout.dto.PaymentResponse(
+                        true,
+                        "TX-123",
+                        "Payment processed",
+                        io.resousadev.linuxtips.mscheckout.strategy.enumeration.PaymentTypeEnum.CREDIT_CARD,
+                        System.currentTimeMillis()
+                );
+
+        when(processPaymentUseCase.execute(any(io.resousadev.linuxtips.mscheckout.dto.PaymentRequest.class)))
+                .thenReturn(paymentResponse);
+
+        mockMvc.perform(post("/v1/mscheckout/checkout/pay")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                        "origem": "web-checkout",
+                        "valor": "150.00",
+                        "paymentType": "CREDIT_CARD"
+                    }
+                    """))
+            .andExpect(status().isOk());
+
+        verify(processPaymentUseCase).execute(any(io.resousadev.linuxtips.mscheckout.dto.PaymentRequest.class));
     }
 }
