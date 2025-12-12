@@ -56,4 +56,55 @@ public class EventBridgeProducer {
             throw e;
         }
     }
+
+    /**
+     * Publica evento de pagamento processado no EventBridge.
+     *
+     * @param payment dados do pagamento
+     * @param transactionId ID da transação
+     * @param paymentType tipo de pagamento
+     */
+    public void publishPaymentProcessedEvent(
+            final Payment payment,
+            final String transactionId,
+            final io.resousadev.linuxtips.mscheckout.strategy.enumeration.PaymentTypeEnum paymentType) {
+        log.debug("Publishing PAYMENT_PROCESSED event: transactionId={}, paymentType={}",
+                transactionId, paymentType);
+
+        final String detailFormat = "{ \"origem\": \"%s\", \"valor\": \"%s\", \"status\": \"%s\", "
+                + "\"transactionId\": \"%s\", \"paymentType\": \"%s\" }";
+        final String detail = String.format(
+                detailFormat,
+                payment.origem(), payment.valor(), payment.status(), transactionId, paymentType
+        );
+
+        final PutEventsRequestEntry eventRequest = PutEventsRequestEntry.builder()
+                .source("checkout-service")
+                .detailType("PAYMENT_PROCESSED")
+                .detail(detail)
+                .eventBusName(EVENT_BUS_NAME)
+                .build();
+
+        try {
+            final PutEventsRequest request = PutEventsRequest.builder()
+                    .entries(eventRequest)
+                    .build();
+
+            final PutEventsResponse response = eventBridgeClient.putEvents(request);
+
+            if (response.failedEntryCount() > 0) {
+                var failedEntry = response.entries().get(0);
+                log.error("PAYMENT_PROCESSED event publish failed: errorCode={}, errorMessage={}",
+                        failedEntry.errorCode(), failedEntry.errorMessage());
+            } else {
+                log.info("PAYMENT_PROCESSED event published: eventId={}, transactionId={}",
+                        response.entries().get(0).eventId(), transactionId);
+            }
+        } catch (Exception e) {
+            log.error("Error publishing PAYMENT_PROCESSED event: transactionId={}, error={}",
+                    transactionId, e.getMessage(), e);
+            throw e;
+        }
+    }
+
 }
